@@ -1,3 +1,6 @@
+// Module: Booking Management 
+// Developed by: Pulindu Seniya
+
 package com.paf_project.smartcampus.controller;
 
 import org.springframework.web.bind.annotation.*;
@@ -5,7 +8,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api")
-public class BookingController_Pulindu {
+public class BookingController {
 
     @GetMapping("/hotels")
     public List<String> getHotels() {
