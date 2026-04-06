@@ -5,7 +5,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api")
-public class HotelController {
+public class BookingController {
 
     @GetMapping("/hotels")
     public List<String> getHotels() {
