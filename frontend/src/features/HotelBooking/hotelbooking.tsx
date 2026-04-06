@@ -1,16 +1,31 @@
 import React, { useState } from "react";
-import "../HotelBooking/hotelbooking.css";
+import "./hotelbooking.css";
 
 const HotelBooking: React.FC = () => {
   const [name, setName] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
-  const [submitted, setSubmitted] = useState(false);
+  const [confirmation, setConfirmation] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+
+    const booking = { name, checkIn, checkOut, guests };
+
+    try {
+      const response = await fetch("http://localhost:8080/api/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(booking),
+      });
+
+      const data = await response.text();
+      setConfirmation(data);
+    } catch (err) {
+      console.error(err);
+      setConfirmation("❌ Booking failed. Please try again.");
+    }
   };
 
   return (
@@ -18,7 +33,7 @@ const HotelBooking: React.FC = () => {
       <h1>🏨 Hotel Booking Management</h1>
       <p>Plan your stay with ease and comfort.</p>
 
-      {!submitted ? (
+      {!confirmation ? (
         <form className="booking-form" onSubmit={handleSubmit}>
           <label>
             Full Name:
@@ -66,11 +81,7 @@ const HotelBooking: React.FC = () => {
       ) : (
         <div className="confirmation">
           <h2>✅ Booking Confirmed!</h2>
-          <p>
-            Thank you, <strong>{name}</strong>. Your stay from{" "}
-            <strong>{checkIn}</strong> to <strong>{checkOut}</strong> for{" "}
-            <strong>{guests}</strong> guest(s) has been reserved.
-          </p>
+          <p>{confirmation}</p>
         </div>
       )}
     </div>
