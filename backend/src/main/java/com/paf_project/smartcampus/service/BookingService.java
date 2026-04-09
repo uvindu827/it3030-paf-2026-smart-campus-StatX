@@ -113,4 +113,39 @@ public class BookingService {
         responseDTO.setCreatedAt(booking.getCreatedAt());
         return responseDTO;
     }
+
+    // Update booking details
+    public BookingResponseDTO updateBooking(Long id, BookingRequestDTO requestDTO) {
+        Booking booking = findBookingEntityById(id);
+
+        // Update fields
+        booking.setResourceName(requestDTO.getResourceName());
+        booking.setRequestedBy(requestDTO.getRequestedBy());
+        booking.setBookingDate(requestDTO.getBookingDate());
+        booking.setStartTime(requestDTO.getStartTime());
+        booking.setEndTime(requestDTO.getEndTime());
+        booking.setPurpose(requestDTO.getPurpose());
+        booking.setExpectedAttendees(requestDTO.getExpectedAttendees());
+
+        // Check conflict again
+        List<Booking> conflictingBookings = bookingRepository
+                .findByResourceNameAndBookingDateAndStartTimeLessThanAndEndTimeGreaterThan(
+                        booking.getResourceName(),
+                        booking.getBookingDate(),
+                        booking.getEndTime(),
+                        booking.getStartTime());
+
+        if (!conflictingBookings.isEmpty()) {
+            throw new RuntimeException("Booking conflict detected during update.");
+        }
+
+        Booking updatedBooking = bookingRepository.save(booking);
+        return mapToResponseDTO(updatedBooking);
+    }
+
+    // Delete booking
+    public void deleteBooking(Long id) {
+        Booking booking = findBookingEntityById(id);
+        bookingRepository.delete(booking);
+    }
 }
