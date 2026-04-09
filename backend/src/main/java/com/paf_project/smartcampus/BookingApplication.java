@@ -1,4 +1,4 @@
-// Module: Booking Management 
+// Module: Booking Management
 // Developed by: Pulindu Seniya
 
 package com.paf_project.smartcampus;
@@ -12,5 +12,4 @@ public class BookingApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BookingApplication.class, args);
 	}
-
 }
