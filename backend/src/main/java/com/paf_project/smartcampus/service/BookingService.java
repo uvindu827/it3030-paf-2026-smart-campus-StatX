@@ -2,6 +2,8 @@
 
 package com.paf_project.smartcampus.service;
 
+import com.paf_project.smartcampus.dto.BookingRequestDTO;
+import com.paf_project.smartcampus.dto.BookingResponseDTO;
 import com.paf_project.smartcampus.model.Booking;
 import com.paf_project.smartcampus.model.BookingStatus;
 import com.paf_project.smartcampus.repository.BookingRepository;
@@ -18,7 +20,9 @@ public class BookingService {
     private BookingRepository bookingRepository;
 
     // Create a new booking
-    public Booking createBooking(Booking booking) {
+    public BookingResponseDTO createBooking(BookingRequestDTO requestDTO) {
+        Booking booking = mapToEntity(requestDTO);
+
         List<Booking> conflictingBookings = bookingRepository
                 .findByResourceNameAndBookingDateAndStartTimeLessThanAndEndTimeGreaterThan(
                         booking.getResourceName(),
@@ -31,41 +35,82 @@ public class BookingService {
         }
 
         booking.setStatus(BookingStatus.PENDING);
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+        return mapToResponseDTO(savedBooking);
     }
 
     // Get all bookings
-    public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
+    public List<BookingResponseDTO> getAllBookings() {
+        return bookingRepository.findAll()
+                .stream()
+                .map(this::mapToResponseDTO)
+                .toList();
     }
 
     // Get booking by ID
-    public Booking getBookingById(Long id) {
+    public BookingResponseDTO getBookingById(Long id) {
+        Optional<Booking> booking = bookingRepository.findById(id);
+        return mapToResponseDTO(
+                booking.orElseThrow(() -> new RuntimeException("Booking not found with id: " + id)));
+    }
+
+    private Booking findBookingEntityById(Long id) {
         Optional<Booking> booking = bookingRepository.findById(id);
         return booking.orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
     }
 
     // Approve booking
-    public Booking approveBooking(Long id, String remarks) {
-        Booking booking = getBookingById(id);
+    public BookingResponseDTO approveBooking(Long id, String remarks) {
+        Booking booking = findBookingEntityById(id);
         booking.setStatus(BookingStatus.APPROVED);
         booking.setAdminRemarks(remarks);
-        return bookingRepository.save(booking);
+        Booking updatedBooking = bookingRepository.save(booking);
+        return mapToResponseDTO(updatedBooking);
     }
 
     // Reject booking
-    public Booking rejectBooking(Long id, String remarks) {
-        Booking booking = getBookingById(id);
+    public BookingResponseDTO rejectBooking(Long id, String remarks) {
+        Booking booking = findBookingEntityById(id);
         booking.setStatus(BookingStatus.REJECTED);
         booking.setAdminRemarks(remarks);
-        return bookingRepository.save(booking);
+        Booking updatedBooking = bookingRepository.save(booking);
+        return mapToResponseDTO(updatedBooking);
     }
 
     // Cancel booking
-    public Booking cancelBooking(Long id, String remarks) {
-        Booking booking = getBookingById(id);
+    public BookingResponseDTO cancelBooking(Long id, String remarks) {
+        Booking booking = findBookingEntityById(id);
         booking.setStatus(BookingStatus.CANCELLED);
         booking.setAdminRemarks(remarks);
-        return bookingRepository.save(booking);
+        Booking updatedBooking = bookingRepository.save(booking);
+        return mapToResponseDTO(updatedBooking);
+    }
+
+    private Booking mapToEntity(BookingRequestDTO requestDTO) {
+        Booking booking = new Booking();
+        booking.setResourceName(requestDTO.getResourceName());
+        booking.setRequestedBy(requestDTO.getRequestedBy());
+        booking.setBookingDate(requestDTO.getBookingDate());
+        booking.setStartTime(requestDTO.getStartTime());
+        booking.setEndTime(requestDTO.getEndTime());
+        booking.setPurpose(requestDTO.getPurpose());
+        booking.setExpectedAttendees(requestDTO.getExpectedAttendees());
+        return booking;
+    }
+
+    private BookingResponseDTO mapToResponseDTO(Booking booking) {
+        BookingResponseDTO responseDTO = new BookingResponseDTO();
+        responseDTO.setId(booking.getId());
+        responseDTO.setResourceName(booking.getResourceName());
+        responseDTO.setRequestedBy(booking.getRequestedBy());
+        responseDTO.setBookingDate(booking.getBookingDate());
+        responseDTO.setStartTime(booking.getStartTime());
+        responseDTO.setEndTime(booking.getEndTime());
+        responseDTO.setPurpose(booking.getPurpose());
+        responseDTO.setExpectedAttendees(booking.getExpectedAttendees());
+        responseDTO.setStatus(booking.getStatus());
+        responseDTO.setAdminRemarks(booking.getAdminRemarks());
+        responseDTO.setCreatedAt(booking.getCreatedAt());
+        return responseDTO;
     }
 }
