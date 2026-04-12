@@ -29,6 +29,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
         String email = user.getAttribute("email");
         String token = jwtUtils.generateToken(email);
 
-        response.sendRedirect("/swagger-ui/index.html?token=" + token);
+        //response.sendRedirect("/swagger-ui/index.html?token=" + token);
+
+        String targetUrl = "http://localhost:3000/login-success?token=" + token;
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }
