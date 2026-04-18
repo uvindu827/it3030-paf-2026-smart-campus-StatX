@@ -7,6 +7,7 @@ import EditBookingPage from "./pages/EditBookingPage";
 import BookingDetailsPage from "./pages/BookingDetailsPage";
 import Login from "./pages/Login";
 import LoginSuccess from "./pages/LoginSuccess";
+import TicketListPage from "./pages/TicketListPage";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/add-booking" element={<AddBookingPage />} />
           <Route path="/edit-booking/:id" element={<EditBookingPage />} />
           <Route path="/booking/:id" element={<BookingDetailsPage />} />
+          <Route path="/tickets" element={<TicketListPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/login-success" element={<LoginSuccess/>} />
         </Routes>
