@@ -9,6 +9,16 @@ import Login from "./pages/Login";
 import LoginSuccess from "./pages/LoginSuccess";
 
 function App() {
+  useEffect(() => {
+    fetch("http://localhost:8080")
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.text();
+      })
+      .then((data) => console.log(data))
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
     <Router>
       <Navbar />
