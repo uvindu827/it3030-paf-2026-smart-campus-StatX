@@ -4,6 +4,10 @@ import com.paf_project.smartcampus.dto.TicketCreateRequestDTO;
 import com.paf_project.smartcampus.dto.TicketResponseDTO;
 import com.paf_project.smartcampus.dto.TicketStatusUpdateRequestDTO;
 import com.paf_project.smartcampus.service.TicketService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -32,6 +36,14 @@ public class TicketController {
         this.ticketService = ticketService;
     }
 
+    @Operation(
+            summary = "Create a new incident ticket",
+            description = "Submit ticket details with up to 3 evidence image attachments.")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            content = @Content(
+                    mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                    schema = @Schema(implementation = TicketCreateMultipartRequestDoc.class)))
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TicketResponseDTO> createTicket(
             @Valid @ModelAttribute TicketCreateRequestDTO request,
@@ -50,5 +62,29 @@ public class TicketController {
             @PathVariable Long id,
             @Valid @RequestBody TicketStatusUpdateRequestDTO request) {
         return ResponseEntity.ok(ticketService.updateStatus(id, request));
+    }
+
+    @Schema(name = "TicketCreateMultipartRequest", description = "Multipart request body for creating a ticket.")
+    private static class TicketCreateMultipartRequestDoc {
+        @Schema(type = "integer", format = "int64", example = "1")
+        public Long resourceId;
+
+        @Schema(type = "integer", format = "int64", example = "12")
+        public Long reportedByUserId;
+
+        @Schema(example = "Electrical")
+        public String category;
+
+        @Schema(example = "Projector in Lab A is flickering and shuts down randomly.")
+        public String description;
+
+        @Schema(allowableValues = { "LOW", "MEDIUM", "HIGH", "CRITICAL" }, example = "HIGH")
+        public String priority;
+
+        @Schema(example = "layara@example.com | +94-7X-XXXXXXX")
+        public String preferredContactDetails;
+
+        @ArraySchema(schema = @Schema(type = "string", format = "binary"))
+        public List<MultipartFile> attachments;
     }
 }

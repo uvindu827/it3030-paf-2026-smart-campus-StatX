@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,15 +77,17 @@ public class TicketService {
             ticketAttachmentRepository.save(attachment);
         }
 
-        Ticket hydratedTicket = ticketRepository.findWithAttachmentsAndCommentsById(savedTicket.getId())
+        Ticket hydratedTicket = ticketRepository.findById(savedTicket.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found after creation."));
+        initializeCollections(hydratedTicket);
         return mapToResponse(hydratedTicket);
     }
 
     @Transactional
     public TicketResponseDTO getTicketById(Long ticketId) {
-        Ticket ticket = ticketRepository.findWithAttachmentsAndCommentsById(ticketId)
+        Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id: " + ticketId));
+        initializeCollections(ticket);
         return mapToResponse(ticket);
     }
 
@@ -107,9 +110,15 @@ public class TicketService {
         }
 
         Ticket savedTicket = ticketRepository.save(ticket);
-        Ticket hydratedTicket = ticketRepository.findWithAttachmentsAndCommentsById(savedTicket.getId())
+        Ticket hydratedTicket = ticketRepository.findById(savedTicket.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found after status update."));
+        initializeCollections(hydratedTicket);
         return mapToResponse(hydratedTicket);
+    }
+
+    private void initializeCollections(Ticket ticket) {
+        Hibernate.initialize(ticket.getAttachments());
+        Hibernate.initialize(ticket.getComments());
     }
 
     private String storeAttachment(Long ticketId, MultipartFile file) {
