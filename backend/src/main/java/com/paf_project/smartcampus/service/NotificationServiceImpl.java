@@ -105,8 +105,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Long getUnreadCount() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUnreadCount'");
+        User currentUser = getCurrentUser();
+
+        return notificationRepository.countByUser_UserIdAndIsReadFalse(currentUser.getUserId());
     }
 
     @Override

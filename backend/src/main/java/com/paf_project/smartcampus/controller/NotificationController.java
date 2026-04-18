@@ -1,5 +1,8 @@
 package com.paf_project.smartcampus.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -65,6 +68,31 @@ public class NotificationController {
         
         return ResponseEntity.status(201).body(createdNotification);
     }
+
+    @GetMapping("/unread")
+    public ResponseEntity<List<NotificationDTO>> getUnreadNotifications(){
+
+        log.info("GET_fetching unread notifications");
+
+        List<NotificationDTO> unreadNotifications = notificationService.getMyUnreadNotifications();
+
+        log.info("Found {} unread notifications", unreadNotifications.size());
+
+        return ResponseEntity.ok(unreadNotifications);
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Map<String, Long>> getMethodName() {
+        
+        log.info("GET_fetching unread notifications count");
+
+        Long unreadCount = notificationService.getUnreadCount();
+
+        log.info("found {} unread notifications", unreadCount);
+
+        return ResponseEntity.ok(Map.of("count", unreadCount));
+    }
+    
     
     
     
