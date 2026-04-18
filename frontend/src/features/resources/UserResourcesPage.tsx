@@ -53,27 +53,28 @@ const UserResourcesPage: React.FC = () => {
       {/* Stats */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
         gap: "16px",
         marginBottom: "24px"
       }}>
         {[
-          { label: "Available Resources", value: activeResources.length, color: "#6366f1" },
-          { label: "Lecture Halls", value: activeResources.filter(r => r.type === "LECTURE_HALL").length, color: "#16a34a" },
-          { label: "Laboratories", value: activeResources.filter(r => r.type === "LABORATORY").length, color: "#f59e0b" },
-          { label: "Meeting Rooms", value: activeResources.filter(r => r.type === "MEETING_ROOM").length, color: "#0ea5e9" },
-        ].map((s) => (
-          <div key={s.label} style={{
-            background: "#fff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
-            padding: "16px 20px",
-            borderLeft: `4px solid ${s.color}`,
-          }}>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>{s.label}</div>
-          </div>
-        ))}
+  { label: "Available Resources", value: activeResources.length, color: "#6366f1" },
+  { label: "Lecture Halls", value: activeResources.filter(r => r.type === "LECTURE_HALL").length, color: "#16a34a" },
+  { label: "Laboratories", value: activeResources.filter(r => r.type === "LABORATORY").length, color: "#f59e0b" },
+  { label: "Meeting Rooms", value: activeResources.filter(r => r.type === "MEETING_ROOM").length, color: "#0ea5e9" },
+  { label: "Equipment", value: activeResources.filter(r => r.type === "EQUIPMENT").length, color: "#ec4899" },
+].map((s) => (
+  <div key={s.label} style={{
+    background: "#fff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    padding: "16px 20px",
+    borderLeft: `4px solid ${s.color}`,
+  }}>
+    <div style={{ fontSize: "24px", fontWeight: 800, color: s.color }}>{s.value}</div>
+    <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>{s.label}</div>
+  </div>
+))}
       </div>
 
       {/* Filters */}
