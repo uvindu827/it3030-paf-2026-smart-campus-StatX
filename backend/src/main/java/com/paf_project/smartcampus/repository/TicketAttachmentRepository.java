@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TicketAttachmentRepository extends JpaRepository<TicketAttachment, Long> {
 
-    List<TicketAttachment> findByTicketId(Long ticketId);
+    List<TicketAttachment> findByTicket_Id(Long ticketId);
 
-    long countByTicketId(Long ticketId);
+    long countByTicket_Id(Long ticketId);
 }
