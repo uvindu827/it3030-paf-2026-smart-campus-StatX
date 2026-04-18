@@ -1,3 +1,4 @@
+import React, { useEffect} from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
@@ -7,6 +8,9 @@ import EditBookingPage from "./pages/EditBookingPage";
 import BookingDetailsPage from "./pages/BookingDetailsPage";
 import Login from "./pages/Login";
 import LoginSuccess from "./pages/LoginSuccess";
+import ResourcesPage from "./features/resources/ResourcesPage";
+import UserResourcesPage from "./features/resources/UserResourcesPage";
+//import "./App.css";
 
 function App() {
   return (
@@ -21,6 +25,8 @@ function App() {
           <Route path="/booking/:id" element={<BookingDetailsPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/login-success" element={<LoginSuccess/>} />
+          <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/browse" element={<UserResourcesPage />} />
         </Routes>
       </div>
     </Router>
