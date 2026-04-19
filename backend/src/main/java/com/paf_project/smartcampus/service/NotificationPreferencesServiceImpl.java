@@ -65,9 +65,24 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     @Override
+    @Transactional
     public void updateMyPreferences(UpdatePreferenceRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateMyPreferences'");
+        User currentUser = getCurrentUser();
+
+        log.info("Updating preferences fro user {} : {}", currentUser.getUserId(), request.getPreferences());
+
+        for(Map.Entry<NotificationType, Boolean> entry : request.getPreferences().entrySet()){
+            NotificationType type = entry.getKey();
+            Boolean enabled = entry.getValue();
+
+            NotificationPreferences preference = notificationPreferenceRepository
+                .findByUser_UserIdAndNotificationType(currentUser.getUserId(), type)
+                .orElse(new NotificationPreferences(currentUser, type, enabled));
+
+            preference.setEnabled(enabled);
+
+            notificationPreferenceRepository.save(preference);
+        }
     }
 
     @Override

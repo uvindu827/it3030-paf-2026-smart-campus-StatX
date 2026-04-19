@@ -8,13 +8,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.paf_project.smartcampus.dto.NotificationPreferenceDTO;
+import com.paf_project.smartcampus.dto.UpdatePreferenceRequest;
 import com.paf_project.smartcampus.service.NotificationPreferencesService;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 @RestController
@@ -41,6 +49,25 @@ public class NotificationPreferenceController {
         log.info("Found {} preferences for current user", preferences.size());
 
         return ResponseEntity.ok(preferences);
+    }
+
+    @PutMapping
+    public ResponseEntity<Void> updatePreferences( 
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Map of notification types and their enabled status",
+            required = true,
+            content = @Content(schema = @Schema(implementation = UpdatePreferenceRequest.class))
+        )
+        @Valid
+        @RequestBody UpdatePreferenceRequest request
+    ) {
+        log.info("PUT-updating user notification preferences: {}", request);
+
+        notificationPreferencesService.updateMyPreferences(request);
+
+        log.info("User notification preferences updated successfully");
+
+        return ResponseEntity.ok().build();
     }
     
 
