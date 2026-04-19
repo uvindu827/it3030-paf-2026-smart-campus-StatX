@@ -42,31 +42,43 @@ export default function TicketDashboard() {
     setIsSubmitting(true);
 
     const data = new FormData();
-    // In a real app, you might structure this as a JSON blob inside the form data, 
-    // but here we append the fields individually based on typical Spring Boot expectations
-    data.append('description', formData.description);
-    data.append('categoryId', formData.category === 'Electrical' ? 1 : 2); // Dummy mapping
-    data.append('priority', formData.priority.toUpperCase());
     
+    // Extracting just the numbers because Spring Boot expects 'Long' (e.g., changes "UID-2204" to 2204)
+    const cleanResourceId = parseInt(formData.resourceId.replace(/\D/g, '')) || 1;
+    const cleanUserId = parseInt(formData.reporterUserId.replace(/\D/g, '')) || 1;
+
+    // These must EXACTLY match TicketCreateRequestDTO fields
+    data.append('resourceId', cleanResourceId); 
+    data.append('reportedByUserId', cleanUserId);
+    data.append('preferredContactDetails', formData.contactDetails);
+    data.append('category', formData.category);
+    data.append('priority', formData.priority.toUpperCase());
+    data.append('description', formData.description);
+
+    // CRITICAL FIX: Your controller specifically looks for "attachments", not "files"!
     files.forEach(file => {
-      data.append('files', file);
+      data.append('attachments', file); 
     });
 
     try {
       const response = await fetch('http://localhost:8080/api/tickets', {
         method: 'POST',
-        body: data,
+        body: data, // fetch automatically handles the multipart/form-data boundary
       });
+      
       if (response.ok) {
         alert("Success! Ticket created perfectly via API.");
+        // Reset form
         setFormData({ resourceId: '', reporterUserId: '', contactDetails: '', category: 'Electrical', priority: 'High', description: '' });
         setFiles([]);
       } else {
-        alert("Ticket creation failed. Check backend logs.");
+        const errorText = await response.text();
+        console.error("Backend Error:", errorText);
+        alert(`Ticket creation failed: ${response.status}`);
       }
     } catch (error) {
       console.error("API Error:", error);
-      alert("Could not connect to backend POST API. Is Spring Boot running?");
+      alert("Could not connect to backend POST API.");
     } finally {
       setIsSubmitting(false);
     }
