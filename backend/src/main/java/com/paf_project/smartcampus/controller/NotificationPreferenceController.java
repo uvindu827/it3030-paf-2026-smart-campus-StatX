@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.paf_project.smartcampus.dto.NotificationPreferenceDTO;
 import com.paf_project.smartcampus.dto.UpdatePreferenceRequest;
+import com.paf_project.smartcampus.model.NotificationType;
 import com.paf_project.smartcampus.service.NotificationPreferencesService;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -67,6 +69,36 @@ public class NotificationPreferenceController {
 
         log.info("User notification preferences updated successfully");
 
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{type}/enable")
+    public ResponseEntity<Void> enableNotificationType(
+        @Parameter(description = "Notification type to enable", example = "BOOKING_APPROVED")
+        @PathVariable NotificationType type
+    ) {
+        
+        log.info("PUT-enabling notification type: {}", type);
+
+        notificationPreferencesService.enableNotificationType(type);
+
+        log.info("Notification type {} enabled successfully", type);
+        
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{type}/enable")
+    public ResponseEntity<Void> disableNotificationType(
+        @Parameter(description = "Notification type to disable", example = "BOOKING_APPROVED")
+        @PathVariable NotificationType type
+    ) {
+        
+        log.info("PUT-disabling notification type: {}", type);
+
+        notificationPreferencesService.disableNotificationType(type);
+
+        log.info("Notification type {} disabled successfully", type);
+        
         return ResponseEntity.ok().build();
     }
     

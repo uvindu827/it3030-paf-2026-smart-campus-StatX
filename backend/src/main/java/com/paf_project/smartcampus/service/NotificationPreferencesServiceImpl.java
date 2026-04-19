@@ -86,15 +86,36 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     @Override
+    @Transactional
     public void enableNotificationType(NotificationType type) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'enableNotificationType'");
+        
+        User currentUser = getCurrentUser();
+
+        NotificationPreferences preference = notificationPreferenceRepository
+            .findByUser_UserIdAndNotificationType(currentUser.getUserId(), type)
+            .orElse(new NotificationPreferences(currentUser, type, true));
+
+        preference.setEnabled(true);
+        
+        notificationPreferenceRepository.save(preference);
+
+        log.info("User {} enabled notification type {}", currentUser.getUserId(), type);
     }
 
     @Override
+    @Transactional
     public void disableNotificationType(NotificationType type) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'disableNotificationType'");
+        User currentUser = getCurrentUser();
+
+        NotificationPreferences preference = notificationPreferenceRepository
+            .findByUser_UserIdAndNotificationType(currentUser.getUserId(), type)
+            .orElse(new NotificationPreferences(currentUser, type, false));
+
+        preference.setEnabled(false);
+        
+        notificationPreferenceRepository.save(preference);
+
+        log.info("User {} disabled notification type {}", currentUser.getUserId(), type);
     }
 
     @Override
