@@ -1,5 +1,4 @@
-import React, { useEffect} from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import BookingListPage from "./pages/BookingListPage";
@@ -8,9 +7,10 @@ import EditBookingPage from "./pages/EditBookingPage";
 import BookingDetailsPage from "./pages/BookingDetailsPage";
 import Login from "./pages/Login";
 import LoginSuccess from "./pages/LoginSuccess";
+import TicketListPage from "./pages/TicketListPage";
+import TicketDashboard from './components/TicketDashboard';
 import ResourcesPage from "./features/resources/ResourcesPage";
 import UserResourcesPage from "./features/resources/UserResourcesPage";
-//import "./App.css";
 
 function App() {
   return (
@@ -23,6 +23,8 @@ function App() {
           <Route path="/add-booking" element={<AddBookingPage />} />
           <Route path="/edit-booking/:id" element={<EditBookingPage />} />
           <Route path="/booking/:id" element={<BookingDetailsPage />} />
+          <Route path="/tickets" element={<TicketListPage />} />
+          <Route path="/ticket-dashboard" element={<TicketDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/login-success" element={<LoginSuccess/>} />
           <Route path="/resources" element={<ResourcesPage />} />
