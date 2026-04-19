@@ -1,5 +1,6 @@
 package com.paf_project.smartcampus.dto;
 
+import com.paf_project.smartcampus.model.NotificationPreferences;
 import com.paf_project.smartcampus.model.NotificationType;
 
 import lombok.AllArgsConstructor;
@@ -15,7 +16,7 @@ public class NotificationPreferenceDTO {
     private NotificationType notificationType;
     private Boolean enabled;
 
-    public static NotificationPreferenceDTO fromEntity(NotificationPreferenceDTO notificationPreferences){
+    public static NotificationPreferenceDTO fromEntity(NotificationPreferences notificationPreferences) {
         NotificationPreferenceDTO dto = new NotificationPreferenceDTO();
         dto.setId(notificationPreferences.getId());
         dto.setNotificationType(notificationPreferences.getNotificationType());

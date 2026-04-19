@@ -74,7 +74,6 @@ public class NotificationController {
             return ResponseEntity.ok(notifications);
         }
     
-
     @PostMapping
     public ResponseEntity<NotificationDTO> createNotification(
         @RequestBody CreateNotificationRequest request
