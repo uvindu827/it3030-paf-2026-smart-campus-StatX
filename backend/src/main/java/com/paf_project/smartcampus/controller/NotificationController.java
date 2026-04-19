@@ -18,6 +18,7 @@ import com.paf_project.smartcampus.model.NotificationType;
 import com.paf_project.smartcampus.service.NotificationService;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +35,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")
+@Tag(
+    name = "Notifications",
+    description = "End points for managing user notifications, including fetching, creating, marking as read, and deleting notifications."
+)
 public class NotificationController {
 
     private final NotificationService notificationService;

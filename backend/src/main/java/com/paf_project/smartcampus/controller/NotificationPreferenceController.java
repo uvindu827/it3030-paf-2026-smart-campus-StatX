@@ -54,7 +54,7 @@ public class NotificationPreferenceController {
         return ResponseEntity.ok(preferences);
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public ResponseEntity<Void> updatePreferences( 
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Map of notification types and their enabled status",
@@ -88,7 +88,7 @@ public class NotificationPreferenceController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{type}/enable")
+    @PutMapping("/{type}/disable")
     public ResponseEntity<Void> disableNotificationType(
         @Parameter(description = "Notification type to disable", example = "BOOKING_APPROVED")
         @PathVariable NotificationType type
@@ -103,7 +103,7 @@ public class NotificationPreferenceController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping
+    @DeleteMapping("/reset")
     public ResponseEntity<Void> resetPreferences(){
 
         log.info("DELETE - resetting preferences to default");
