@@ -15,11 +15,14 @@ import com.paf_project.smartcampus.dto.CreateNotificationRequest;
 import com.paf_project.smartcampus.dto.NotificationDTO;
 import com.paf_project.smartcampus.service.NotificationService;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -93,7 +96,32 @@ public class NotificationController {
         return ResponseEntity.ok(Map.of("count", unreadCount));
     }
     
-    
+    @PutMapping("/{id}/read")
+    public ResponseEntity<Void> markAsRead(
+        @Parameter(description = "Notifications ID", example = "1")
+        @PathVariable Long id
+    ){
+        log.info("PUT-marking notification as read");
+
+        notificationService.markAsRead(id);
+
+        log.info("Notification {} marked as read", id);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/mark-all-read")
+    public ResponseEntity<Void> markAllAsRead() 
+    {
+        
+        log.info("PUT-marking all notifications as read");
+
+        notificationService.markAllAsRead();
+
+        log.info("All notifications marked as read");
+
+        return ResponseEntity.ok().build();
+    }
     
     
 }

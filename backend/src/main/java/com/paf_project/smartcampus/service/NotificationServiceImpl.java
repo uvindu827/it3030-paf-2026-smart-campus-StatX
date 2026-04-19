@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -111,18 +112,33 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
     public void markAsRead(Long notificationId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'markAsRead'");
+        User currentUser = getCurrentUser();
+
+        Notification notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        if(!notification.getUser().getUserId().equals(currentUser.getUserId())){
+            throw new RuntimeException("User dont have the permission to modify the notification");
+        }
+
+        notification.markAsRead();
+        notificationRepository.save(notification);
     }
 
     @Override
+    @Transactional
     public void markAllAsRead() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'markAllAsRead'");
+        User currentUser = getCurrentUser();
+
+        notificationRepository.markAllAsReadByUserId(currentUser.getUserId());
+
+        log.info("Marked all notifications as read for user {}", currentUser.getUserId());
     }
 
     @Override
+    @Transactional
     public void deleteNotification(Long notificationId) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteNotification'");
