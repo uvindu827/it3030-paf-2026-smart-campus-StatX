@@ -140,14 +140,32 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void deleteNotification(Long notificationId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteNotification'");
+        User currentUser = getCurrentUser();
+
+        Notification notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        if(!notification.getUser().getUserId().equals(currentUser.getUserId())){
+            throw new RuntimeException("User dont have permission to delete notification");
+        }
+
+        notificationRepository.delete(notification);
+
+        log.info("Nootification {} deleted for user {}", notificationId, currentUser.getUserId());
     }
 
     @Override
     public Page<NotificationDTO> getNotificationsByType(NotificationType type, Pageable pageable) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getNotificationsByType'");
+        User currentUser = getCurrentUser();
+
+        Page<Notification> notifications = 
+            notificationRepository.findByUser_UserIdAndTypeOrderByCreatedAtDesc(
+                currentUser.getUserId(), 
+                type, 
+                pageable
+            );
+
+        return notifications.map(NotificationDTO::fromEntity);
     }
     
 }

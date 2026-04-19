@@ -8,11 +8,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.paf_project.smartcampus.dto.CreateNotificationRequest;
 import com.paf_project.smartcampus.dto.NotificationDTO;
+import com.paf_project.smartcampus.model.NotificationType;
 import com.paf_project.smartcampus.service.NotificationService;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -51,6 +53,27 @@ public class NotificationController {
 
         return ResponseEntity.ok(notifications);
     }
+
+    @GetMapping("/by-type")
+        public ResponseEntity<Page<NotificationDTO>> getNotificationsByType(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam NotificationType type
+        ) {
+            log.info("GET-fetching notifications by type {}", type);
+
+            Pageable pageable = PageRequest.of(page, size);
+
+            Page<NotificationDTO> notifications = notificationService.getNotificationsByType(
+                type, 
+                pageable
+            );
+
+            log.info("Found {} notifications of type {}", notifications.getTotalElements(), type);
+
+            return ResponseEntity.ok(notifications);
+        }
+    
 
     @PostMapping
     public ResponseEntity<NotificationDTO> createNotification(
@@ -122,6 +145,22 @@ public class NotificationController {
 
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(
+        @Parameter(description = "Notifications ID", example = "1")
+        @PathVariable Long id
+    ){
+        log.info("DELETE-deleting notification {}", id);
+
+        notificationService.deleteNotification(id);
+
+        log.info("Notification {} deleted successfully", id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    
     
     
 }
