@@ -1,0 +1,170 @@
+package com.paf_project.smartcampus.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.paf_project.smartcampus.dto.CreateNotificationRequest;
+import com.paf_project.smartcampus.dto.NotificationDTO;
+import com.paf_project.smartcampus.model.NotificationType;
+import com.paf_project.smartcampus.service.NotificationService;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+
+
+@RestController
+@RequestMapping("/api/v1/notifications")
+@RequiredArgsConstructor
+@Slf4j
+@CrossOrigin(origins = "*")
+@Tag(
+    name = "Notifications",
+    description = "End points for managing user notifications, including fetching, creating, marking as read, and deleting notifications."
+)
+public class NotificationController {
+
+    private final NotificationService notificationService;
+
+    @GetMapping
+    public ResponseEntity<Page<NotificationDTO>> getMyNotifications(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info("Get-fetching notifications page {} with zise {}", page, size);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<NotificationDTO> notifications = notificationService.getMyNotifications(pageable);
+
+        log.info("Found {} notifications for current user", notifications.getTotalElements());
+
+        return ResponseEntity.ok(notifications);
+    }
+
+    @GetMapping("/by-type")
+        public ResponseEntity<Page<NotificationDTO>> getNotificationsByType(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam NotificationType type
+        ) {
+            log.info("GET-fetching notifications by type {}", type);
+
+            Pageable pageable = PageRequest.of(page, size);
+
+            Page<NotificationDTO> notifications = notificationService.getNotificationsByType(
+                type, 
+                pageable
+            );
+
+            log.info("Found {} notifications of type {}", notifications.getTotalElements(), type);
+
+            return ResponseEntity.ok(notifications);
+        }
+    
+    @PostMapping
+    public ResponseEntity<NotificationDTO> createNotification(
+        @RequestBody CreateNotificationRequest request
+    ) {
+        
+        log.info("POST-creating notifications {}", request);
+
+        NotificationDTO createdNotification = notificationService.createNotification(request);
+
+        if(createdNotification == null) {
+            log.warn("Notification is not created - user has disabled notifications type");
+
+            return ResponseEntity.ok(null);
+        }
+
+        log.info("Notification created with id {}", createdNotification.getId());
+        
+        return ResponseEntity.status(201).body(createdNotification);
+    }
+
+    @GetMapping("/unread")
+    public ResponseEntity<List<NotificationDTO>> getUnreadNotifications(){
+
+        log.info("GET_fetching unread notifications");
+
+        List<NotificationDTO> unreadNotifications = notificationService.getMyUnreadNotifications();
+
+        log.info("Found {} unread notifications", unreadNotifications.size());
+
+        return ResponseEntity.ok(unreadNotifications);
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Map<String, Long>> getMethodName() {
+        
+        log.info("GET_fetching unread notifications count");
+
+        Long unreadCount = notificationService.getUnreadCount();
+
+        log.info("found {} unread notifications", unreadCount);
+
+        return ResponseEntity.ok(Map.of("count", unreadCount));
+    }
+    
+    @PutMapping("/{id}/read")
+    public ResponseEntity<Void> markAsRead(
+        @Parameter(description = "Notifications ID", example = "1")
+        @PathVariable Long id
+    ){
+        log.info("PUT-marking notification as read");
+
+        notificationService.markAsRead(id);
+
+        log.info("Notification {} marked as read", id);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/mark-all-read")
+    public ResponseEntity<Void> markAllAsRead() 
+    {
+        
+        log.info("PUT-marking all notifications as read");
+
+        notificationService.markAllAsRead();
+
+        log.info("All notifications marked as read");
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(
+        @Parameter(description = "Notifications ID", example = "1")
+        @PathVariable Long id
+    ){
+        log.info("DELETE-deleting notification {}", id);
+
+        notificationService.deleteNotification(id);
+
+        log.info("Notification {} deleted successfully", id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    
+    
+    
+}
