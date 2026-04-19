@@ -119,9 +119,14 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     @Override
+    @Transactional
     public void resetToDefaultPreferences() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'resetToDefaultPreferences'");
+        User currentUser = getCurrentUser();
+
+        notificationPreferenceRepository.deleteByUser_UserId(currentUser.getUserId());
+
+        log.info("User {} reset notification preferences to default", currentUser.getUserId());
+
     }
     
 }

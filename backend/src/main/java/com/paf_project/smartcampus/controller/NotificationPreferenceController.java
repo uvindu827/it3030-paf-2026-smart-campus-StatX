@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -100,6 +101,16 @@ public class NotificationPreferenceController {
         log.info("Notification type {} disabled successfully", type);
         
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> resetPreferences(){
+
+        log.info("DELETE - resetting preferences to default");
+
+        notificationPreferencesService.resetToDefaultPreferences();
+
+        return ResponseEntity.noContent().build();
     }
     
 
