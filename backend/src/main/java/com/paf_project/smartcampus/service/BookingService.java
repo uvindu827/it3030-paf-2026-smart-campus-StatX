@@ -85,6 +85,15 @@ public class BookingService {
         booking.setStatus(BookingStatus.REJECTED);
         booking.setAdminRemarks(remarks);
         Booking updatedBooking = bookingRepository.save(booking);
+
+        //notify user about booking rejection
+        notificationHelper.notifyBookingRejected(
+            Long.parseLong(booking.getRequestedBy()), 
+            booking.getId(), 
+            booking.getResourceName(), 
+            remarks
+        );
+
         return mapToResponseDTO(updatedBooking);
     }
 
@@ -94,6 +103,14 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         booking.setAdminRemarks(remarks);
         Booking updatedBooking = bookingRepository.save(booking);
+
+         //notify user about booking cancellation
+        notificationHelper.notifyBookingcancelled(
+            Long.parseLong(booking.getRequestedBy()), 
+            booking.getId(), 
+            booking.getResourceName() 
+        );
+
         return mapToResponseDTO(updatedBooking);
     }
 

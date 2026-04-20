@@ -94,4 +94,52 @@ public class NotificationHelper {
 
     }
 
+    public void notifyBookingRejected(
+        Long userId,
+        Long bookingId,
+        String resourceName,
+        String reason
+    ){
+        log.info("Creating booking rejected notification for user {} and booking {}", userId, bookingId);
+
+        String message = String.format(
+            "Your booking for %s has been rejected. Reason: %s",
+            resourceName,
+            reason
+        );
+
+        createNotification(
+            userId,
+            NotificationType.BOOKING_REJECTED,
+            message,
+            bookingId,
+            "BOOKING",
+            NotificationPriority.HIGH
+        );
+    }
+
+     public void notifyBookingcancelled(
+        Long userId,
+        Long bookingId,
+        String resourceName
+    ){
+        log.info("Creating booking cancelled notification for user {} and booking {}", userId, bookingId);
+
+        String message = String.format(
+            "Your booking for %s has been cancelled.",
+            resourceName
+        );
+
+        createNotification(
+            userId,
+            NotificationType.BOOKING_CANCELLED,
+            message,
+            bookingId,
+            "BOOKING",
+            NotificationPriority.NORMAL
+        );
+    }
+
+
+
 }
