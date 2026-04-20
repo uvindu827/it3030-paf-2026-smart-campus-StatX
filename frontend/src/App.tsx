@@ -24,7 +24,7 @@ function App() {
           <Route path="/edit-booking/:id" element={<EditBookingPage />} />
           <Route path="/booking/:id" element={<BookingDetailsPage />} />
           <Route path="/tickets" element={<TicketListPage />} />
-          <Route path="/ticket-dashboard" element={<TicketDashboard />} />
+          <Route path="/ticket-dashboard/:id?" element={<TicketDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/login-success" element={<LoginSuccess/>} />
           <Route path="/resources" element={<ResourcesPage />} />

@@ -83,6 +83,16 @@ public class TicketService {
         return mapToResponse(hydratedTicket);
     }
 
+    // NEW ADDITION: Fetch all tickets, initialize their lazy collections, and map to DTOs
+    @Transactional
+    public List<TicketResponseDTO> getAllTickets() {
+        List<Ticket> tickets = ticketRepository.findAll();
+        return tickets.stream().map(ticket -> {
+            initializeCollections(ticket);
+            return mapToResponse(ticket);
+        }).collect(Collectors.toList());
+    }
+
     @Transactional
     public TicketResponseDTO getTicketById(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
