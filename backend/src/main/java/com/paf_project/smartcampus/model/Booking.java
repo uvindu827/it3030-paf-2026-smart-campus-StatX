@@ -56,4 +56,48 @@ public class Booking {
             this.status = BookingStatus.PENDING;
         }
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public String getRequestedBy() {
+        return requestedBy;
+    }
+
+    public LocalDate getBookingDate() {
+        return bookingDate;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public Integer getExpectedAttendees() {
+        return expectedAttendees;
+    }
+
+    public BookingStatus getStatus() {
+        return status;
+    }
+
+    public String getAdminRemarks() {
+        return adminRemarks;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }
