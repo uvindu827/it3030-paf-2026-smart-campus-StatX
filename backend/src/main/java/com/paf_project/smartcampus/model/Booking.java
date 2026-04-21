@@ -21,4 +21,13 @@ public class Booking {
     @Column(nullable = false)
     private String requestedBy;
 
+    @Column(nullable = false)
+    private LocalDate bookingDate;
+
+    @Column(nullable = false)
+    private LocalTime startTime;
+
+    @Column(nullable = false)
+    private LocalTime endTime;
+
 }
