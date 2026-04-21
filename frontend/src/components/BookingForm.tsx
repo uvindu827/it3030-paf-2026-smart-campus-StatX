@@ -22,4 +22,14 @@ function BookingForm({
 }: BookingFormProps) {
 }
 
+  const [formData, setFormData] = useState<Booking>({
+    resourceName: "",
+    requestedBy: "",
+    bookingDate: "",
+    startTime: "",
+    endTime: "",
+    purpose: "",
+    expectedAttendees: 0,
+  });
+
 export default BookingForm;
