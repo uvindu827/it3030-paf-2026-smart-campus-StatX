@@ -36,4 +36,18 @@ public class BookingController {
     public BookingResponseDTO getBookingById(@PathVariable Long id) {
         return bookingService.getBookingById(id);
     }
+
+    // Approve booking
+    @PutMapping("/{id}/approve")
+    public BookingResponseDTO approveBooking(@PathVariable Long id,
+            @RequestParam String remarks) {
+        return bookingService.approveBooking(id, remarks);
+    }
+
+    // Reject booking
+    @PutMapping("/{id}/reject")
+    public BookingResponseDTO rejectBooking(@PathVariable Long id,
+            @RequestParam String remarks) {
+        return bookingService.rejectBooking(id, remarks);
+    }
 }
