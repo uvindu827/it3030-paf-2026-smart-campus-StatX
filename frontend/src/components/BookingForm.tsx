@@ -52,6 +52,18 @@ function BookingForm({
     }
   }, [initialData]);
 
-  
+    const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === "expectedAttendees" ? (value === "" ? 0 : Number(value)) : value,
+    }));
+  };
+
+
 
 export default BookingForm;
