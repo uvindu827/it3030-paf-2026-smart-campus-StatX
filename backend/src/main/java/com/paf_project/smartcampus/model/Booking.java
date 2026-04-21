@@ -49,4 +49,11 @@ public class Booking {
     public Booking() {
     }
 
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = BookingStatus.PENDING;
+        }
+    }
 }
