@@ -12,3 +12,12 @@ export const getBookingById = async (id: string | number): Promise<Booking> => {
   const response = await axios.get<Booking>(`${API_BASE_URL}/${id}`);
   return response.data;
 };
+
+export const createBooking = async (bookingData: Booking): Promise<Booking> => {
+  const response = await axios.post<Booking>(API_BASE_URL, bookingData, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.data;
+};
