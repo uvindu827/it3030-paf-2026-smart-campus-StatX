@@ -33,3 +33,8 @@ export const updateBooking = async (
   });
   return response.data;
 };
+
+export const deleteBooking = async (id: string | number): Promise<string> => {
+  const response = await axios.delete(`${API_BASE_URL}/${id}`);
+  return response.data;
+};
