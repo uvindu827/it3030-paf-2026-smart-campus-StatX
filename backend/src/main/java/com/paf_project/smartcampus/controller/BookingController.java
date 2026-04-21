@@ -57,4 +57,11 @@ public class BookingController {
             @RequestParam String remarks) {
         return bookingService.cancelBooking(id, remarks);
     }
+
+    // Update booking
+    @PutMapping("/{id}")
+    public BookingResponseDTO updateBooking(@PathVariable Long id,
+            @RequestBody BookingRequestDTO requestDTO) {
+        return bookingService.updateBooking(id, requestDTO);
+    }
 }
