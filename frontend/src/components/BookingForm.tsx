@@ -20,8 +20,6 @@ function BookingForm({
   onSubmit,
   submitButtonText,
 }: BookingFormProps) {
-}
-
   const [formData, setFormData] = useState<Booking>({
     resourceName: "",
     requestedBy: "",
@@ -52,7 +50,7 @@ function BookingForm({
     }
   }, [initialData]);
 
-    const handleChange = (
+  const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
@@ -64,7 +62,7 @@ function BookingForm({
     }));
   };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const payload: Booking = {
@@ -80,7 +78,7 @@ function BookingForm({
     onSubmit(payload);
   };
 
-    return (
+  return (
     <form
       onSubmit={handleSubmit}
       className="mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-6 shadow-lg md:p-8"
@@ -92,6 +90,142 @@ function BookingForm({
         </p>
       </div>
 
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-800">
+            Resource Name
+          </label>
+          <div className="relative">
+            <FaRegBuilding className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              name="resourceName"
+              value={formData.resourceName}
+              onChange={handleChange}
+              required
+              placeholder="Enter resource name"
+              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+        </div>
 
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-800">
+            Requested By
+          </label>
+          <div className="relative">
+            <FaRegUser className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              name="requestedBy"
+              value={formData.requestedBy}
+              onChange={handleChange}
+              required
+              placeholder="Enter requester name"
+              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-800">
+            Booking Date
+          </label>
+          <div className="relative">
+            <FaRegCalendarAlt className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="date"
+              name="bookingDate"
+              value={formData.bookingDate}
+              onChange={handleChange}
+              required
+              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-800">
+            Expected Attendees
+          </label>
+          <div className="relative">
+            <FaUsers className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="number"
+              name="expectedAttendees"
+              value={formData.expectedAttendees}
+              onChange={handleChange}
+              required
+              min="1"
+              placeholder="Enter attendee count"
+              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-800">
+            Start Time
+          </label>
+          <div className="relative">
+            <FaRegClock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="time"
+              name="startTime"
+              value={formData.startTime}
+              onChange={handleChange}
+              required
+              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-800">
+            End Time
+          </label>
+          <div className="relative">
+            <FaRegClock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="time"
+              name="endTime"
+              value={formData.endTime}
+              onChange={handleChange}
+              required
+              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="mb-2 block text-sm font-semibold text-slate-800">
+            Purpose
+          </label>
+          <div className="relative">
+            <MdOutlineDescription className="pointer-events-none absolute left-4 top-4 text-xl text-slate-500" />
+            <textarea
+              name="purpose"
+              value={formData.purpose}
+              onChange={handleChange}
+              required
+              rows={5}
+              placeholder="Enter booking purpose"
+              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <button
+          type="submit"
+          className="inline-flex items-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-blue-700"
+        >
+          {submitButtonText}
+        </button>
+      </div>
+    </form>
+  );
+}
 
 export default BookingForm;
