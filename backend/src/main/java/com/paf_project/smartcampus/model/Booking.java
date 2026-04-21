@@ -36,4 +36,11 @@ public class Booking {
     @Column(nullable = false)
     private Integer expectedAttendees;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BookingStatus status;
+
+    @Column(length = 500)
+    private String adminRemarks;
+
 }
