@@ -4,4 +4,9 @@
 package com.paf_project.smartcampus.model;
 
 public enum BookingStatus {
+
+    PENDING,
+    APPROVED,
+    REJECTED,
+    CANCELLED
 }
