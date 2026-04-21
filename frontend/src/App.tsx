@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import BookingListPage from "./pages/BookingListPage";
@@ -11,6 +12,17 @@ import TicketListPage from "./pages/TicketListPage";
 import TicketDashboard from './components/TicketDashboard';
 import ResourcesPage from "./features/resources/ResourcesPage";
 import UserResourcesPage from "./features/resources/UserResourcesPage";
+import NotificationsPage from "./pages/NotificationPage";
+import NotificationSettingsPage from "./pages/NotificationSettings";
+
+
+<ToastContainer
+  position="top-right"
+  autoClose={3000}
+  hideProgressBar={false}
+  closeOnClick
+  pauseOnHover
+/>
 
 function App() {
   return (
@@ -29,6 +41,8 @@ function App() {
           <Route path="/login-success" element={<LoginSuccess/>} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/browse" element={<UserResourcesPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/notification-settings" element={<NotificationSettingsPage />} />
         </Routes>
       </div>
     </Router>
