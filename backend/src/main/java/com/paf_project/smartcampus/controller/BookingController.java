@@ -18,4 +18,10 @@ public class BookingController {
 
     @Autowired
     private BookingService bookingService;
+
+    // Create a new booking
+    @PostMapping
+    public BookingResponseDTO createBooking(@RequestBody BookingRequestDTO requestDTO) {
+        return bookingService.createBooking(requestDTO);
+    }
 }
