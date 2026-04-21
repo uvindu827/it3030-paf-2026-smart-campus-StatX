@@ -30,4 +30,10 @@ public class Booking {
     @Column(nullable = false)
     private LocalTime endTime;
 
+    @Column(nullable = false, length = 500)
+    private String purpose;
+
+    @Column(nullable = false)
+    private Integer expectedAttendees;
+
 }
