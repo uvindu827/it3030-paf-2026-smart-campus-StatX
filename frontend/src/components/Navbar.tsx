@@ -21,3 +21,15 @@ export const createBooking = async (bookingData: Booking): Promise<Booking> => {
   });
   return response.data;
 };
+
+export const updateBooking = async (
+  id: string | number,
+  bookingData: Booking
+): Promise<Booking> => {
+  const response = await axios.put<Booking>(`${API_BASE_URL}/${id}`, bookingData, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.data;
+};
