@@ -330,14 +330,12 @@ function BookingList({ bookings, onDelete }: BookingListProps) {
                           >
                             Edit
                           </Link>
-
-                          <button
-                            className="action-btn delete-btn"
-                            onClick={() => booking.id && handleDelete(booking.id)}
-                            title="Delete Booking"
-                          >
-                            Delete
-                          </button>
+                        <button
+                          className="btn small-btn danger-btn"
+                          onClick={() => booking.id && onDelete(booking.id)}
+                        >
+                          Delete
+                        </button>
                         </div>
                       </td>
                     </tr>
