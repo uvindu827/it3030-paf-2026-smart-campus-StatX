@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { Booking } from "../types/booking";
-import "../App.css";
 
 interface BookingListProps {
   bookings: Booking[];
@@ -47,8 +46,7 @@ function BookingList({ bookings, onDelete }: BookingListProps) {
       const matchesStatus =
         statusFilter === "ALL" || booking.status === statusFilter;
 
-      const matchesDate =
-        !dateFilter || booking.bookingDate === dateFilter;
+      const matchesDate = !dateFilter || booking.bookingDate === dateFilter;
 
       return matchesSearch && matchesStatus && matchesDate;
     });
@@ -120,7 +118,7 @@ function BookingList({ bookings, onDelete }: BookingListProps) {
       0
     ) || 0;
 
-  const getStatusBadgeClass = (status: string) => {
+  const getStatusBadgeClass = (status?: string) => {
     switch (status) {
       case "APPROVED":
         return "status-badge approved";
@@ -136,15 +134,6 @@ function BookingList({ bookings, onDelete }: BookingListProps) {
   const getSortIndicator = (field: SortField) => {
     if (sortField !== field) return "↕";
     return sortDirection === "asc" ? "↑" : "↓";
-  };
-
-  const handleDelete = (id: number) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this booking?"
-    );
-    if (confirmed) {
-      onDelete(id);
-    }
   };
 
   return (
@@ -299,18 +288,18 @@ function BookingList({ bookings, onDelete }: BookingListProps) {
 
                 <tbody>
                   {currentBookings.map((booking) => (
-                    <tr key={booking.id}>
-                      <td>{booking.id}</td>
-                      <td>{booking.resourceName}</td>
-                      <td>{booking.requestedBy}</td>
-                      <td>{booking.bookingDate}</td>
-                      <td>{booking.startTime}</td>
-                      <td>{booking.endTime}</td>
-                      <td className="purpose-cell">{booking.purpose}</td>
-                      <td>{booking.expectedAttendees}</td>
+                    <tr key={booking.id ?? Math.random()}>
+                      <td>{booking.id ?? "N/A"}</td>
+                      <td>{booking.resourceName || "N/A"}</td>
+                      <td>{booking.requestedBy || "N/A"}</td>
+                      <td>{booking.bookingDate || "N/A"}</td>
+                      <td>{booking.startTime || "N/A"}</td>
+                      <td>{booking.endTime || "N/A"}</td>
+                      <td className="purpose-cell">{booking.purpose || "N/A"}</td>
+                      <td>{booking.expectedAttendees ?? "N/A"}</td>
                       <td>
                         <span className={getStatusBadgeClass(booking.status)}>
-                          {booking.status}
+                          {booking.status || "N/A"}
                         </span>
                       </td>
                       <td>
@@ -330,12 +319,14 @@ function BookingList({ bookings, onDelete }: BookingListProps) {
                           >
                             Edit
                           </Link>
-                        <button
-                          className="btn small-btn danger-btn"
-                          onClick={() => booking.id && onDelete(booking.id)}
-                        >
-                          Delete
-                        </button>
+
+                          <button
+                            className="action-btn delete-btn"
+                            onClick={() => booking.id && onDelete(booking.id)}
+                            title="Delete Booking"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
