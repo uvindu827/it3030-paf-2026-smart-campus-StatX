@@ -81,14 +81,18 @@ function BookingForm({
     }
 
     const payload: Booking = {
-      resourceName: formData.resourceName,
-      requestedBy: formData.requestedBy,
-      bookingDate: formData.bookingDate,
-      startTime: formData.startTime,
-      endTime: formData.endTime,
-      purpose: formData.purpose,
-      expectedAttendees: Number(formData.expectedAttendees),
-    };
+    id: formData.id,
+    resourceName: formData.resourceName,
+    requestedBy: formData.requestedBy,
+    bookingDate: formData.bookingDate,
+    startTime: formData.startTime,
+    endTime: formData.endTime,
+    purpose: formData.purpose,
+    expectedAttendees: Number(formData.expectedAttendees),
+    status: formData.status,
+    adminRemarks: formData.adminRemarks,
+    createdAt: formData.createdAt,
+  };
 
     try {
       setIsSubmitting(true);
