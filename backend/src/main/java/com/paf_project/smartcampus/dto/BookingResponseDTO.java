@@ -21,4 +21,7 @@ public class BookingResponseDTO {
     private String adminRemarks;
     private LocalDateTime createdAt;
 
+    public BookingResponseDTO() {
+    }
+
 }
