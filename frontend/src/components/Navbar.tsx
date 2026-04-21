@@ -38,3 +38,13 @@ export const deleteBooking = async (id: string | number): Promise<string> => {
   const response = await axios.delete(`${API_BASE_URL}/${id}`);
   return response.data;
 };
+
+function Navbar() {
+  return (
+    <nav className="navbar">
+      <h2>SmartCampus Booking Management</h2>
+    </nav>
+  );
+}
+
+export default Navbar;
