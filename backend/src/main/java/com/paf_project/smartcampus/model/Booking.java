@@ -11,5 +11,14 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "bookings")
 public class Booking {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String resourceName;
+
+    @Column(nullable = false)
+    private String requestedBy;
 
 }
