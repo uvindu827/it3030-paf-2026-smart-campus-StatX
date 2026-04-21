@@ -32,4 +32,26 @@ function BookingForm({
     expectedAttendees: 0,
   });
 
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        resourceName: initialData.resourceName || "",
+        requestedBy: initialData.requestedBy || "",
+        bookingDate: initialData.bookingDate || "",
+        startTime: initialData.startTime
+          ? initialData.startTime.slice(0, 5)
+          : "",
+        endTime: initialData.endTime ? initialData.endTime.slice(0, 5) : "",
+        purpose: initialData.purpose || "",
+        expectedAttendees: initialData.expectedAttendees || 0,
+        id: initialData.id,
+        status: initialData.status,
+        adminRemarks: initialData.adminRemarks,
+        createdAt: initialData.createdAt,
+      });
+    }
+  }, [initialData]);
+
+  
+
 export default BookingForm;
