@@ -43,4 +43,7 @@ public class Booking {
     @Column(length = 500)
     private String adminRemarks;
 
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
 }
