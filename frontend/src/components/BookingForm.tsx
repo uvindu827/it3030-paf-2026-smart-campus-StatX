@@ -64,6 +64,22 @@ function BookingForm({
     }));
   };
 
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const payload: Booking = {
+      resourceName: formData.resourceName,
+      requestedBy: formData.requestedBy,
+      bookingDate: formData.bookingDate,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      purpose: formData.purpose,
+      expectedAttendees: Number(formData.expectedAttendees),
+    };
+
+    onSubmit(payload);
+  };
+
 
 
 export default BookingForm;
