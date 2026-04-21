@@ -7,6 +7,11 @@ interface BookingListProps {
 }
 
 function BookingList({ bookings, onDelete }: BookingListProps) {
+    if (!bookings || bookings.length === 0) {
+    return <p>No bookings found.</p>;
+  }
 }
+
+
 
 export default BookingList;
