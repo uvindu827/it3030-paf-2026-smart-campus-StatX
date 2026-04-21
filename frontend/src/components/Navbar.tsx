@@ -7,3 +7,8 @@ export const getAllBookings = async (): Promise<Booking[]> => {
   const response = await axios.get<Booking[]>(API_BASE_URL);
   return response.data;
 };
+
+export const getBookingById = async (id: string | number): Promise<Booking> => {
+  const response = await axios.get<Booking>(`${API_BASE_URL}/${id}`);
+  return response.data;
+};
