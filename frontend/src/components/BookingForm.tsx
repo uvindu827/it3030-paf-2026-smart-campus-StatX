@@ -80,6 +80,18 @@ function BookingForm({
     onSubmit(payload);
   };
 
+    return (
+    <form
+      onSubmit={handleSubmit}
+      className="mx-auto w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-6 shadow-lg md:p-8"
+    >
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-slate-900">Booking Form</h2>
+        <p className="mt-2 text-base text-slate-600">
+          Fill in the required details to create or update a booking request.
+        </p>
+      </div>
+
 
 
 export default BookingForm;
