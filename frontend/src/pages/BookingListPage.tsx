@@ -21,6 +21,10 @@ function BookingListPage() {
       setLoading(false);
     }
   };
+
+    useEffect(() => {
+    fetchBookings();
+  }, []);
 }
 
 export default BookingListPage;
