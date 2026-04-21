@@ -50,4 +50,11 @@ public class BookingController {
             @RequestParam String remarks) {
         return bookingService.rejectBooking(id, remarks);
     }
+
+    // Cancel booking
+    @PutMapping("/{id}/cancel")
+    public BookingResponseDTO cancelBooking(@PathVariable Long id,
+            @RequestParam String remarks) {
+        return bookingService.cancelBooking(id, remarks);
+    }
 }
