@@ -8,4 +8,12 @@ import java.time.LocalTime;
 
 public class BookingRequestDTO {
 
+    private String resourceName;
+    private String requestedBy;
+    private LocalDate bookingDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
+    private String purpose;
+    private Integer expectedAttendees;
+
 }
