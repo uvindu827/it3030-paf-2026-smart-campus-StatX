@@ -7,10 +7,9 @@ interface BookingListProps {
 }
 
 function BookingList({ bookings, onDelete }: BookingListProps) {
-    if (!bookings || bookings.length === 0) {
+  if (!bookings || bookings.length === 0) {
     return <p>No bookings found.</p>;
   }
-}
 
   return (
     <div className="table-container">
@@ -30,8 +29,41 @@ function BookingList({ bookings, onDelete }: BookingListProps) {
           </tr>
         </thead>
 
-      
-
-
+        <tbody>
+          {bookings.map((booking) => (
+            <tr key={booking.id}>
+              <td>{booking.id}</td>
+              <td>{booking.resourceName}</td>
+              <td>{booking.requestedBy}</td>
+              <td>{booking.bookingDate}</td>
+              <td>{booking.startTime}</td>
+              <td>{booking.endTime}</td>
+              <td>{booking.purpose}</td>
+              <td>{booking.expectedAttendees}</td>
+              <td>{booking.status}</td>
+              <td className="actions">
+                <Link to={`/booking/${booking.id}`} className="btn small-btn">
+                  View
+                </Link>
+                <Link
+                  to={`/edit-booking/${booking.id}`}
+                  className="btn small-btn warning-btn"
+                >
+                  Edit
+                </Link>
+                <button
+                  className="btn small-btn danger-btn"
+                  onClick={() => booking.id && onDelete(booking.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export default BookingList;
