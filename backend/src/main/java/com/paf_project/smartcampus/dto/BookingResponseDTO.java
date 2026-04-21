@@ -9,4 +9,16 @@ import java.time.LocalTime;
 
 public class BookingResponseDTO {
 
+    private Long id;
+    private String resourceName;
+    private String requestedBy;
+    private LocalDate bookingDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
+    private String purpose;
+    private Integer expectedAttendees;
+    private BookingStatus status;
+    private String adminRemarks;
+    private LocalDateTime createdAt;
+
 }
