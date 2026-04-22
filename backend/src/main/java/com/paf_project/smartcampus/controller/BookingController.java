@@ -71,5 +71,4 @@ public class BookingController {
         bookingService.deleteBooking(id);
         return "Booking deleted successfully";
     }
-
 }
