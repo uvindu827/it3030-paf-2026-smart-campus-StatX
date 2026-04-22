@@ -161,7 +161,22 @@ public class BookingService {
     public BookingResponseDTO updateBooking(Long id, BookingRequestDTO requestDTO) {
         Booking booking = findBookingEntityById(id);
 
-        // Update fields
+        // Check conflict against OTHER bookings only
+        List<Booking> conflictingBookings = bookingRepository
+                .findByResourceNameAndBookingDateAndStartTimeLessThanAndEndTimeGreaterThan(
+                        requestDTO.getResourceName(),
+                        requestDTO.getBookingDate(),
+                        requestDTO.getEndTime(),
+                        requestDTO.getStartTime());
+
+        boolean hasRealConflict = conflictingBookings.stream()
+                .anyMatch(existingBooking -> !existingBooking.getId().equals(id));
+
+        if (hasRealConflict) {
+            throw new RuntimeException("Booking conflict detected during update.");
+        }
+
+        // Update fields after conflict check
         booking.setResourceName(requestDTO.getResourceName());
         booking.setRequestedBy(requestDTO.getRequestedBy());
         booking.setBookingDate(requestDTO.getBookingDate());
@@ -169,18 +184,6 @@ public class BookingService {
         booking.setEndTime(requestDTO.getEndTime());
         booking.setPurpose(requestDTO.getPurpose());
         booking.setExpectedAttendees(requestDTO.getExpectedAttendees());
-
-        // Check conflict again
-        List<Booking> conflictingBookings = bookingRepository
-                .findByResourceNameAndBookingDateAndStartTimeLessThanAndEndTimeGreaterThan(
-                        booking.getResourceName(),
-                        booking.getBookingDate(),
-                        booking.getEndTime(),
-                        booking.getStartTime());
-
-        if (!conflictingBookings.isEmpty()) {
-            throw new RuntimeException("Booking conflict detected during update.");
-        }
 
         Booking updatedBooking = bookingRepository.save(booking);
         return mapToResponseDTO(updatedBooking);

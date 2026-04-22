@@ -77,5 +77,4 @@ public ResponseEntity<BookingResponseDTO> createBooking(@RequestBody BookingRequ
         bookingService.deleteBooking(id);
         return "Booking deleted successfully";
     }
-
 }

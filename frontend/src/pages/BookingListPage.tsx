@@ -8,6 +8,10 @@ function BookingListPage() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
 
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const fetchBookings = async () => {
     try {
       setLoading(true);
@@ -26,18 +30,31 @@ function BookingListPage() {
     fetchBookings();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this booking?"
-    );
-    if (!confirmDelete) return;
+  const handleDelete = (id: number) => {
+    setSelectedBookingId(id);
+    setShowConfirm(true);
+  };
+
+  const handleCancelDelete = () => {
+    setShowConfirm(false);
+    setSelectedBookingId(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (selectedBookingId === null) return;
 
     try {
-      await deleteBooking(id);
-      fetchBookings();
+      setIsDeleting(true);
+      await deleteBooking(selectedBookingId);
+      await fetchBookings();
+      setShowConfirm(false);
+      setSelectedBookingId(null);
+      setError("");
     } catch (err) {
       setError("Failed to delete booking.");
       console.error(err);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -50,6 +67,39 @@ function BookingListPage() {
 
       {!loading && !error && (
         <BookingList bookings={bookings} onDelete={handleDelete} />
+      )}
+
+      {showConfirm && (
+        <div className="custom-overlay">
+          <div className="custom-box">
+            <div className="custom-icon">🗑️</div>
+            <h3>Delete Booking?</h3>
+            <p>
+              Are you sure you want to delete this booking? This action cannot be
+              undone.
+            </p>
+
+            <div className="custom-actions">
+              <button
+                type="button"
+                className="btn-cancel"
+                onClick={handleCancelDelete}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="btn-delete"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -41,7 +41,7 @@ export const deleteBooking = async (id: string | number): Promise<string> => {
 
 function Navbar() {
   return (
-    <nav className="navbar">
+    <nav className="navbar">zz
       <h2>SmartCampus Booking Management</h2>
     </nav>
   );
