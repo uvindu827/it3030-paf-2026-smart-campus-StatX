@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
@@ -16,19 +16,17 @@ import NotificationsPage from "./pages/NotificationPage";
 import NotificationSettingsPage from "./pages/NotificationSettings";
 
 
-<ToastContainer
-  position="top-right"
-  autoClose={3000}
-  hideProgressBar={false}
-  closeOnClick
-  pauseOnHover
-/>
+function AppContent() {
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/login-success';
 
-function App() {
   return (
-    <Router>
-      <Navbar />
-      <div className="container">
+    <>
+      {/* 1. Hide Navbar on Login pages */}
+      {!isAuthPage && <Navbar />}
+
+      {/* 2. REMOVED "container" class - using w-full min-h-screen instead */}
+      <div className="w-full min-h-screen">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/bookings" element={<BookingListPage />} />
@@ -45,6 +43,21 @@ function App() {
           <Route path="/notification-settings" element={<NotificationSettingsPage />} />
         </Routes>
       </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+      />
+      <AppContent />
     </Router>
   );
 }
