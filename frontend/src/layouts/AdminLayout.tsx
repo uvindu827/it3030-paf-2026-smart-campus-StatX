@@ -50,17 +50,6 @@ const AdminLayout: React.FC = () => {
 
             {/* Right Section */}
             <div className="flex items-center gap-4 ml-auto">
-              {/* Search Bar (Optional) */}
-              <div className="hidden md:block">
-                <input
-                  type="search"
-                  placeholder="Search..."
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none w-64"
-                />
-              </div>
-
-              {/* Notification Bell */}
-              <NotificationBell />
 
               {/* Admin Avatar (Mobile) */}
               <div className="lg:hidden w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center font-bold text-white">

@@ -8,20 +8,32 @@ const LoginSuccess = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
-        const role = params.get('role'); // Capture role from URL
+        const role = params.get('role');
 
         if (token) {
-            // Save both for future use
             localStorage.setItem('token', token);
             localStorage.setItem('role', role || 'ROLE_USER');
-            
-            console.log('Logged in as:', role);
 
-            // Conditional Navigation
+            try {
+                
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const decoded = JSON.parse(window.atob(base64));
+                
+                const userEmail = decoded.sub || ""; 
+                const userName = decoded.name || userEmail.split('@')[0];
+
+                localStorage.setItem('userEmail', userEmail);
+                localStorage.setItem('userName', userName);
+                
+            } catch (error) {
+                console.error("Token decoding failed", error);
+            }
+
             if (role === 'ROLE_ADMIN') {
-                navigate('/admin'); // Admin goes to Dashboard
+                navigate('/admin');
             } else {
-                navigate('/home');  // Regular user goes to Home
+                navigate('/home');
             }
         } else {
             navigate('/login');

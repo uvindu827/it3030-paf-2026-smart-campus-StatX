@@ -1,28 +1,36 @@
 import { Link } from "react-router-dom";
 import NotificationBell from "../components/NotificationBell";
+import { LogOut } from "lucide-react";
 
 function HomePage() {
   const userName = localStorage.getItem("userName") || "User";
   const initials = userName.split(" ").map(n => n[0]).join("").toUpperCase();
   const role = localStorage.getItem("role");
 
+  const handleLogout = () => {
+    localStorage.clear(); 
+    window.location.href = "/login"; 
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       {/* NAVBAR */}
       <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          
+          {/* Logo Section */}
           <div className="flex items-center gap-2">
             <span className="text-2xl">🎓</span>
             <h2 className="text-xl font-bold tracking-tight text-blue-600">SmartCampus</h2>
           </div>
 
+          {/* Navigation Links (Desktop) */}
           <div className="flex items-center gap-8">
             <div className="hidden space-x-6 md:flex items-center">
               <Link to="/home" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Home</Link>
               <Link to="/resources" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Resources</Link>
               <Link to="/bookings" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Bookings</Link>
               
-              {/* Conditional Admin Link */}
               {role === 'ROLE_ADMIN' && (
                 <Link to="/admin" className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 transition-all">
                   🛡️ Admin Panel
@@ -32,11 +40,23 @@ function HomePage() {
             
             <div className="h-6 w-px bg-slate-200"></div>
             
-            {/* The Notification Bell - Hidden for Admin to prevent 500 errors */}
-            {role !== 'ROLE_ADMIN' && <NotificationBell />}
-            
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700 shadow-sm border border-blue-200">
-              {initials}
+            {/* Action Icons Section */}
+            <div className="flex items-center gap-4">
+              {role !== 'ROLE_ADMIN' && <NotificationBell />}
+              
+              {/* Profile Circle */}
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700 shadow-sm border border-blue-200">
+                {initials}
+              </div>
+
+              {/* Logout Button */}
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-red-600 transition-colors border-l pl-4 border-slate-200"
+              >
+                <LogOut size={18} />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
         </div>
@@ -86,7 +106,7 @@ function HomePage() {
             </div>
           </div>
 
-          {/* Notifications / Admin Action */}
+          {/* Notifications */}
           <div className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
             <div>
               <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-2xl group-hover:bg-purple-600 transition-colors">🔔</div>
