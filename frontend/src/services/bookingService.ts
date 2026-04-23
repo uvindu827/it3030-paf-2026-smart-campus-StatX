@@ -48,3 +48,28 @@ export const deleteBooking = async (id: string | number): Promise<string> => {
   const response = await axios.delete(`${API_BASE_URL}/${id}`, getAuthHeaders());
   return response.data;
 };
+
+// Admin functions for booking management
+export const approveBooking = async (id: string | number, remarks: string): Promise<Booking> => {
+  const response = await axios.put<Booking>(`${API_BASE_URL}/${id}/approve`, null, {
+    ...getAuthHeaders(),
+    params: { remarks }
+  });
+  return response.data;
+};
+
+export const rejectBooking = async (id: string | number, remarks: string): Promise<Booking> => {
+  const response = await axios.put<Booking>(`${API_BASE_URL}/${id}/reject`, null, {
+    ...getAuthHeaders(),
+    params: { remarks }
+  });
+  return response.data;
+};
+
+export const cancelBooking = async (id: string | number, remarks: string): Promise<Booking> => {
+  const response = await axios.put<Booking>(`${API_BASE_URL}/${id}/cancel`, null, {
+    ...getAuthHeaders(),
+    params: { remarks }
+  });
+  return response.data;
+};

@@ -18,6 +18,7 @@ import NotificationSettingsPage from "./pages/NotificationSettings";
 import AdminLayout from './layouts/AdminLayout';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminBookingManagement from './pages/admin/AdminBookingManagement';
 
 
 function AppContent() {
@@ -49,6 +50,7 @@ function AppContent() {
 
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
+            <Route path="bookings" element={<AdminBookingManagement />} />
           </Route>
 
         </Routes>
