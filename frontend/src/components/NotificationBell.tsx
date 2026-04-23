@@ -136,12 +136,13 @@ const NotificationBell: React.FC = () => {
       {/* Bell Icon with Badge */}
       <button 
         onClick={toggleDropdown}
-        className="relative p-2 text-white hover:bg-white/10 rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
+        // CHANGE text-white TO text-slate-600
+        className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
         aria-label="Notifications"
       >
         <Bell size={24} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center shadow-lg animate-pulse-soft">
+          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-lg">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
