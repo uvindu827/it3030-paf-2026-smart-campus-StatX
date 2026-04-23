@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Calendar, Building2, Ticket, Users, 
-  ArrowUpRight, Activity, MapPin, UserPlus, ShieldCheck 
-} from 'lucide-react';
+import { Calendar, Building2, Ticket, Users, UserPlus, ShieldCheck, LayoutDashboard } from 'lucide-react';
 import { toast } from 'react-toastify';
-
-// Import services
 import { getAllBookings } from '../../services/bookingService';
 import { getAllResources, Resource } from '../../services/resourceService';
 import { registerAdmin, getAllUsers } from '../../services/userService';
@@ -16,8 +11,6 @@ const AdminDashboard: React.FC = () => {
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [facilities, setFacilities] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // New Admin Registration State
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [adminData, setAdminData] = useState({ name: '', email: '' });
 
@@ -29,9 +22,7 @@ const AdminDashboard: React.FC = () => {
         getAllResources(),
         getAllUsers()
       ]);
-
       setFacilities(resources);
-
       const activeResources = resources.filter(r => r.status === 'ACTIVE' || r.status === 'AVAILABLE').length;
       const pendingBookings = bookings.filter(b => b.status === 'Pending').length;
 
@@ -41,18 +32,15 @@ const AdminDashboard: React.FC = () => {
         { title: 'Pending Approvals', value: pendingBookings.toString(), icon: Ticket, color: 'from-orange-500 to-orange-600', bgColor: 'bg-orange-50', textColor: 'text-orange-600' },
         { title: 'System Users', value: users.length.toString(), icon: Users, color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-50', textColor: 'text-purple-600' },
       ]);
-
       setRecentBookings([...bookings].sort((a, b) => (b.id ?? 0) - (a.id ?? 0)).slice(0, 4));
     } catch (error) {
-      console.error("Dashboard data fetch failed:", error);
+      console.error("Dashboard error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
   const handleRegisterAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,13 +49,13 @@ const AdminDashboard: React.FC = () => {
       toast.success("New Admin Registered!");
       setShowAdminForm(false);
       setAdminData({ name: '', email: '' });
-      fetchDashboardData(); // Refresh stats
+      fetchDashboardData();
     } catch (error) {
-      toast.error("Failed to register admin. check permissions.");
+      toast.error("Failed to register admin.");
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary-500"></div></div>;
+  if (loading) return <div className="flex justify-center items-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div></div>;
 
   return (
     <div className="space-y-6 p-6">
@@ -77,26 +65,20 @@ const AdminDashboard: React.FC = () => {
           <h1 className="text-3xl font-bold mb-2">Admin Dashboard 👋</h1>
           <p className="text-slate-400 font-medium">Control center for SmartCampus resources.</p>
         </div>
-        <button 
-          onClick={() => setShowAdminForm(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20"
-        >
-          <UserPlus size={20} /> Register New Admin
-        </button>
+        <div className="flex gap-3">
+          <Link to="/home" className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-5 py-3 rounded-xl font-bold transition-all">
+            <LayoutDashboard size={20} /> View Home
+          </Link>
+          <button onClick={() => setShowAdminForm(true)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl font-bold transition-all">
+            <UserPlus size={20} /> Register Admin
+          </button>
+        </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
-<<<<<<< Updated upstream
-          <Link
-            key={i}
-            to={stat.title === 'Pending Approvals' ? '/admin/bookings' : '#'}
-            className={`bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden ${stat.title === 'Pending Approvals' ? 'hover:shadow-md transition-shadow cursor-pointer' : ''}`}
-          >
-=======
           <Link key={i} to={stat.title === 'Pending Approvals' ? '/admin/bookings' : '#'} className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
->>>>>>> Stashed changes
             <div className="p-5">
               <div className={`inline-flex p-3 rounded-lg ${stat.bgColor} ${stat.textColor} mb-4`}><stat.icon size={20} /></div>
               <h3 className="text-slate-500 text-sm font-medium">{stat.title}</h3>
@@ -107,7 +89,7 @@ const AdminDashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Sections */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Recent Bookings */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
@@ -117,21 +99,13 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="space-y-3">
             {recentBookings.map(b => (
-<<<<<<< Updated upstream
-              <Link
-                key={b.id}
-                to={`/booking/${b.id}`}
-                className="flex justify-between items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-=======
               <div key={b.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
->>>>>>> Stashed changes
                 <div>
                   <p className="font-bold text-slate-900">{b.resourceName}</p>
                   <p className="text-xs text-slate-500">{b.userEmail}</p>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-1 bg-white border rounded-full uppercase">{b.status}</span>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
@@ -167,35 +141,15 @@ const AdminDashboard: React.FC = () => {
             <form onSubmit={handleRegisterAdmin} className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
-                <input 
-                  type="text" required value={adminData.name}
-                  onChange={e => setAdminData({...adminData, name: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="Enter name"
-                />
+                <input type="text" required value={adminData.name} onChange={e => setAdminData({...adminData, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter name" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
-                <input 
-                  type="email" required value={adminData.email}
-                  onChange={e => setAdminData({...adminData, email: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="admin@campus.com"
-                />
+                <input type="email" required value={adminData.email} onChange={e => setAdminData({...adminData, email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500" placeholder="admin@campus.com" />
               </div>
               <div className="flex gap-3 mt-8">
-                <button 
-                  type="button" onClick={() => setShowAdminForm(false)}
-                  className="flex-1 px-4 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-all"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="flex-1 px-4 py-3 font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
-                >
-                  Register Admin
-                </button>
+                <button type="button" onClick={() => setShowAdminForm(false)} className="flex-1 px-4 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl">Cancel</button>
+                <button type="submit" className="flex-1 px-4 py-3 font-bold text-white bg-blue-600 rounded-xl shadow-lg">Register</button>
               </div>
             </form>
           </div>
