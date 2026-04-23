@@ -14,11 +14,8 @@ import ResourcesPage from "./features/resources/ResourcesPage";
 import UserResourcesPage from "./features/resources/UserResourcesPage";
 import NotificationsPage from "./pages/NotificationPage";
 import NotificationSettingsPage from "./pages/NotificationSettings";
-
 import AdminLayout from './layouts/AdminLayout';
-
 import AdminDashboard from './pages/admin/AdminDashboard';
-
 
 function AppContent() {
   const location = useLocation();
@@ -26,10 +23,7 @@ function AppContent() {
 
   return (
     <>
-      {/* 1. Hide Navbar on Login pages */}
       {!isAuthPage && <Navbar />}
-
-      {/* 2. REMOVED "container" class - using w-full min-h-screen instead */}
       <div className="w-full min-h-screen">
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -47,10 +41,15 @@ function AppContent() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/notification-settings" element={<NotificationSettingsPage />} />
 
+          {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
+<<<<<<< Updated upstream
+=======
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="bookings" element={<AdminBookingManagement />} />
+>>>>>>> Stashed changes
           </Route>
-
         </Routes>
       </div>
     </>
@@ -60,13 +59,7 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        closeOnClick
-        pauseOnHover
-      />
+      <ToastContainer position="top-right" autoClose={3000} />
       <AppContent />
     </Router>
   );
