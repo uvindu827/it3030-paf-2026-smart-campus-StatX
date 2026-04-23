@@ -1,16 +1,27 @@
 // frontend/src/layouts/AdminLayout.tsx
 
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
 import { Menu, Bell } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
 const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const getPageTitle = () => {
+    if (location.pathname === '/admin') return 'Admin Dashboard';
+    if (location.pathname === '/admin/bookings') return 'Booking Management';
+    if (location.pathname === '/admin/facilities') return 'Facility Management';
+    if (location.pathname === '/admin/tickets') return 'Ticket Management';
+    if (location.pathname === '/admin/users') return 'User Management';
+    if (location.pathname === '/admin/settings') return 'Settings';
+    return 'Admin Dashboard';
   };
 
   return (
@@ -33,7 +44,7 @@ const AdminLayout: React.FC = () => {
 
             {/* Page Title - Hidden on mobile, shown on desktop */}
             <div className="hidden lg:block">
-              <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{getPageTitle()}</h1>
               <p className="text-sm text-gray-600">Manage your campus operations</p>
             </div>
 

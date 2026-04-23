@@ -16,6 +16,7 @@ import NotificationsPage from "./pages/NotificationPage";
 import NotificationSettingsPage from "./pages/NotificationSettings";
 import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminBookingManagement from './pages/admin/AdminBookingManagement';
 
 function AppContent() {
   const location = useLocation();
@@ -44,11 +45,8 @@ function AppContent() {
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
-<<<<<<< Updated upstream
-=======
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="bookings" element={<AdminBookingManagement />} />
->>>>>>> Stashed changes
           </Route>
         </Routes>
       </div>
