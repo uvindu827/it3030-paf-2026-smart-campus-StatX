@@ -15,6 +15,10 @@ import UserResourcesPage from "./features/resources/UserResourcesPage";
 import NotificationsPage from "./pages/NotificationPage";
 import NotificationSettingsPage from "./pages/NotificationSettings";
 
+import AdminLayout from './layouts/AdminLayout';
+
+import AdminDashboard from './pages/admin/AdminDashboard';
+
 
 function AppContent() {
   const location = useLocation();
@@ -41,6 +45,11 @@ function AppContent() {
           <Route path="/browse" element={<UserResourcesPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/notification-settings" element={<NotificationSettingsPage />} />
+
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+          </Route>
+
         </Routes>
       </div>
     </>
