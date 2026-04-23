@@ -88,14 +88,18 @@ const AdminDashboard: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+          <Link
+            key={i}
+            to={stat.title === 'Pending Approvals' ? '/admin/bookings' : '#'}
+            className={`bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden ${stat.title === 'Pending Approvals' ? 'hover:shadow-md transition-shadow cursor-pointer' : ''}`}
+          >
             <div className="p-5">
               <div className={`inline-flex p-3 rounded-lg ${stat.bgColor} ${stat.textColor} mb-4`}><stat.icon size={20} /></div>
               <h3 className="text-slate-500 text-sm font-medium">{stat.title}</h3>
               <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
             </div>
             <div className={`h-1 bg-gradient-to-r ${stat.color}`} />
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -103,16 +107,23 @@ const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Recent Bookings */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
-          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><Calendar className="text-blue-500" size={20}/> Recent Bookings</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2"><Calendar className="text-blue-500" size={20}/> Recent Bookings</h2>
+            <Link to="/admin/bookings" className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All →</Link>
+          </div>
           <div className="space-y-3">
             {recentBookings.map(b => (
-              <div key={b.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+              <Link
+                key={b.id}
+                to={`/booking/${b.id}`}
+                className="flex justify-between items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              >
                 <div>
                   <p className="font-bold text-slate-900">{b.resourceName}</p>
                   <p className="text-xs text-slate-500">{b.userEmail}</p>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-1 bg-white border rounded-full uppercase">{b.status}</span>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
