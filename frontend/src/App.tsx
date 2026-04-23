@@ -1,63 +1,140 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
+
+// Components & Layouts
 import Navbar from "./components/Navbar";
+import AdminLayout from './layouts/AdminLayout';
+import TicketDashboard from './components/TicketDashboard';
+
+// User Pages
 import HomePage from "./pages/HomePage";
 import BookingListPage from "./pages/BookingListPage";
 import AddBookingPage from "./pages/AddBookingPage";
 import EditBookingPage from "./pages/EditBookingPage";
 import BookingDetailsPage from "./pages/BookingDetailsPage";
-import Login from "./pages/Login";
-import LoginSuccess from "./pages/LoginSuccess";
 import TicketListPage from "./pages/TicketListPage";
-import TicketDashboard from './components/TicketDashboard';
-import ResourcesPage from "./features/resources/ResourcesPage";
-import UserResourcesPage from "./features/resources/UserResourcesPage";
 import NotificationsPage from "./pages/NotificationPage";
 import NotificationSettingsPage from "./pages/NotificationSettings";
-import AdminLayout from './layouts/AdminLayout';
+import UserManagement from "./pages/admin/UserManagement";
+
+// Resource Pages
+import ResourcesPage from "./features/resources/ResourcesPage";
+import UserResourcesPage from "./features/resources/UserResourcesPage";
+
+// Auth Pages
+import Login from "./pages/Login";
+import LoginSuccess from "./pages/LoginSuccess";
+
+// Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminBookingManagement from './pages/admin/AdminBookingManagement';
 
+/**
+ * AppContent handles the conditional rendering of the Navbar 
+ * and defines the routing structure.
+ */
 function AppContent() {
   const location = useLocation();
+  
+  // Define pages where the Navbar should NOT be displayed
   const isAuthPage = location.pathname === '/login' || location.pathname === '/login-success';
+  
+  // Check if user is logged in by looking for the role in storage
+  const isAuthenticated = !!localStorage.getItem("role");
 
   return (
     <>
+      {/* 1. Show Navbar only for logged-in users and non-auth pages */}
       {!isAuthPage && <Navbar />}
+
       <div className="w-full min-h-screen">
         <Routes>
+          {/* ROOT REDIRECT */}
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/bookings" element={<BookingListPage />} />
-          <Route path="/add-booking" element={<AddBookingPage />} />
-          <Route path="/edit-booking/:id" element={<EditBookingPage />} />
-          <Route path="/booking/:id" element={<BookingDetailsPage />} />
-          <Route path="/tickets" element={<TicketListPage />} />
-          <Route path="/ticket-dashboard" element={<TicketDashboard />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/login-success" element={<LoginSuccess/>} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/browse" element={<UserResourcesPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/notification-settings" element={<NotificationSettingsPage />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
+          {/* PUBLIC / AUTH ROUTES */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/login-success" element={<LoginSuccess />} />
+
+          {/* PROTECTED USER ROUTES */}
+          <Route 
+            path="/home" 
+            element={isAuthenticated ? <HomePage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/bookings" 
+            element={isAuthenticated ? <BookingListPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/add-booking" 
+            element={isAuthenticated ? <AddBookingPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/edit-booking/:id" 
+            element={isAuthenticated ? <EditBookingPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/booking/:id" 
+            element={isAuthenticated ? <BookingDetailsPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/tickets" 
+            element={isAuthenticated ? <TicketListPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/ticket-dashboard" 
+            element={isAuthenticated ? <TicketDashboard /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/resources" 
+            element={isAuthenticated ? <ResourcesPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/browse" 
+            element={isAuthenticated ? <UserResourcesPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/notifications" 
+            element={isAuthenticated ? <NotificationsPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/notification-settings" 
+            element={isAuthenticated ? <NotificationSettingsPage /> : <Navigate to="/login" />} 
+          />
+
+          {/* PROTECTED ADMIN ROUTES */}
+          <Route 
+            path="/admin" 
+            element={isAuthenticated ? <AdminLayout /> : <Navigate to="/login" />}
+          >
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="bookings" element={<AdminBookingManagement />} />
+            <Route path="/admin/users" element={<UserManagement />} />
           </Route>
+
+          {/* CATCH-ALL REDIRECT */}
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </div>
     </>
   );
 }
 
+/**
+ * Root App Component
+ */
 function App() {
   return (
     <Router>
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer 
+        position="top-right" 
+        autoClose={3000} 
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        theme="light"
+      />
       <AppContent />
     </Router>
   );
