@@ -23,6 +23,7 @@ export default {
         'slide-down': 'slideDown 0.3s ease-out',
         'fade-in': 'fadeIn 0.3s ease-out',
         'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
+        blob: "blob 7s infinite", // Added correctly here
       },
       keyframes: {
         slideDown: {
@@ -37,8 +38,14 @@ export default {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.1)' },
         },
+        blob: { // Added correctly here
+          "0%": { transform: "translate(0px, 0px) scale(1)" },
+          "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+          "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+          "100%": { transform: "translate(0px, 0px) scale(1)" },
+        },
       },
     },
   },
   plugins: [],
-}
+};

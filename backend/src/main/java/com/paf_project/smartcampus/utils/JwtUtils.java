@@ -16,11 +16,14 @@ public class JwtUtils {
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
+    @Value("${app.jwt.expirationMs}")
+    private long jwtExpiration;
+
     public String generateToken(String email) {
         return Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 86400000))
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey())
                 .compact();
     }

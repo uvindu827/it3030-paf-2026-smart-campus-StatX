@@ -106,9 +106,16 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Long getUnreadCount() {
-        User currentUser = getCurrentUser();
+        // Get the email of the person currently logged in (from JWT)
+        String email = org.springframework.security.core.context.SecurityContextHolder
+                        .getContext().getAuthentication().getName();
 
-        return notificationRepository.countByUser_UserIdAndIsReadFalse(currentUser.getUserId());
+        // Look up that user in the DB
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Return the count using the ID from the database
+        return notificationRepository.countByUser_UserIdAndIsReadFalse(user.getUserId());
     }
 
     @Override
