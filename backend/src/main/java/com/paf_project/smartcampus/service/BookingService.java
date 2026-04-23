@@ -6,7 +6,10 @@ import com.paf_project.smartcampus.dto.BookingRequestDTO;
 import com.paf_project.smartcampus.dto.BookingResponseDTO;
 import com.paf_project.smartcampus.model.Booking;
 import com.paf_project.smartcampus.model.BookingStatus;
+import com.paf_project.smartcampus.model.User;
 import com.paf_project.smartcampus.repository.BookingRepository;
+import com.paf_project.smartcampus.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +25,22 @@ public class BookingService {
     @Autowired
     private NotificationHelper notificationHelper;
 
-    // Create a new booking
-    public BookingResponseDTO createBooking(BookingRequestDTO requestDTO) {
-        Booking booking = mapToEntity(requestDTO);
+    @Autowired
+    private UserRepository userRepository;
 
+    // Create a new booking
+    public BookingResponseDTO createBooking(BookingRequestDTO requestDTO, String userEmail) {
+        // 1. Find the user in the DB using the email from the token
+        User currentUser = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Booking booking = mapToEntity(requestDTO);
+        
+        // 2. Set the requestedBy field to the actual database User ID
+        booking.setUser(currentUser); 
+        booking.setRequestedBy(currentUser.getName());
+
+        // 3. Perform conflict check
         List<Booking> conflictingBookings = bookingRepository
                 .findByResourceNameAndBookingDateAndStartTimeLessThanAndEndTimeGreaterThan(
                         booking.getResourceName(),
@@ -71,7 +86,7 @@ public class BookingService {
 
         //notify user about booking approval
         notificationHelper.notifyBookingApproved(
-            Long.parseLong(booking.getRequestedBy()),
+            booking.getUser().getUserId(), // Clean and safe
             booking.getId(),
             booking.getResourceName(),
             booking.getBookingDate().toString()
@@ -87,11 +102,11 @@ public class BookingService {
         Booking updatedBooking = bookingRepository.save(booking);
 
         //notify user about booking rejection
-        notificationHelper.notifyBookingRejected(
-            Long.parseLong(booking.getRequestedBy()), 
-            booking.getId(), 
-            booking.getResourceName(), 
-            remarks
+        notificationHelper.notifyBookingApproved(
+            booking.getUser().getUserId(), // Clean and safe
+            booking.getId(),
+            booking.getResourceName(),
+            booking.getBookingDate().toString()
         );
 
         return mapToResponseDTO(updatedBooking);

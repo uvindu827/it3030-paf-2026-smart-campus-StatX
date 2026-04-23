@@ -75,7 +75,7 @@ export const notificationService = {
    * Get unread count
    */
   async getUnreadCount(): Promise<number> {
-    const response = await fetch(`${API_BASE_URL}/count`, {
+    const response = await fetch(`${API_BASE_URL}/unread-count`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
