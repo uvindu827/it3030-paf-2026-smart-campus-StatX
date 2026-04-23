@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
@@ -32,7 +32,8 @@ function AppContent() {
       {/* 2. REMOVED "container" class - using w-full min-h-screen instead */}
       <div className="w-full min-h-screen">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/bookings" element={<BookingListPage />} />
           <Route path="/add-booking" element={<AddBookingPage />} />
           <Route path="/edit-booking/:id" element={<EditBookingPage />} />

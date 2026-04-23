@@ -1,5 +1,7 @@
 package com.paf_project.smartcampus.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,18 @@ public class UserService {
 
                 return userRepository.save(newUser);
             });
+    }
+
+    public User createAdminUser(User adminData) {
+        User admin = new User();
+        admin.setName(adminData.getName());
+        admin.setEmail(adminData.getEmail());
+        admin.setRole("ROLE_ADMIN"); // Explicitly set admin role
+        return userRepository.save(admin);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
     
 }
