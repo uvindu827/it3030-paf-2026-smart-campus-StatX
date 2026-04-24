@@ -3,6 +3,7 @@ package com.paf_project.smartcampus.controller;
 import com.paf_project.smartcampus.dto.TicketCreateRequestDTO;
 import com.paf_project.smartcampus.dto.TicketResponseDTO;
 import com.paf_project.smartcampus.dto.TicketStatusUpdateRequestDTO;
+import com.paf_project.smartcampus.dto.TicketCommentRequestDTO;
 import com.paf_project.smartcampus.service.TicketService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -68,6 +69,13 @@ public class TicketController {
             @PathVariable Long id,
             @Valid @RequestBody TicketStatusUpdateRequestDTO request) {
         return ResponseEntity.ok(ticketService.updateStatus(id, request));
+    }
+
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<TicketResponseDTO> addCommentToTicket(
+            @PathVariable Long id,
+            @Valid @RequestBody TicketCommentRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.addComment(id, request));
     }
 
     @Schema(name = "TicketCreateMultipartRequest", description = "Multipart request body for creating a ticket.")
