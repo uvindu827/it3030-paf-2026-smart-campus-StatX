@@ -1,7 +1,5 @@
-// frontend/src/components/NotificationBell.tsx
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, X, Check, CheckCheck, Trash2 } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { notificationService, Notification } from '../services/NotificationService';
 import { toast } from 'react-toastify';
@@ -54,10 +52,12 @@ const NotificationBell: React.FC = () => {
     setLoading(true);
     try {
       const data = await notificationService.getUnreadNotifications();
-      setNotifications(data);
+      // Safety check: ensure we always set an array
+      setNotifications(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
       toast.error('Failed to load notifications');
+      setNotifications([]); 
     } finally {
       setLoading(false);
     }
@@ -136,7 +136,6 @@ const NotificationBell: React.FC = () => {
       {/* Bell Icon with Badge */}
       <button 
         onClick={toggleDropdown}
-        // CHANGE text-white TO text-slate-600
         className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
         aria-label="Notifications"
       >
@@ -152,12 +151,12 @@ const NotificationBell: React.FC = () => {
       {isOpen && (
         <div className="absolute top-full right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl overflow-hidden animate-slide-down z-50">
           {/* Header */}
-          <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-5 py-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold">Notifications</h3>
             {unreadCount > 0 && (
               <button 
                 onClick={handleMarkAllAsRead}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 border border-white/30 rounded-lg text-sm font-medium transition-all duration-200 hover:-translate-y-0.5"
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 border border-white/30 rounded-lg text-sm font-medium transition-all duration-200"
               >
                 <CheckCheck size={16} />
                 Mark all read
@@ -169,10 +168,10 @@ const NotificationBell: React.FC = () => {
           <div className="max-h-[400px] overflow-y-auto">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-16 gap-4">
-                <div className="w-10 h-10 border-4 border-gray-200 border-t-primary-500 rounded-full animate-spin"></div>
+                <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
                 <p className="text-gray-500 text-sm">Loading...</p>
               </div>
-            ) : notifications.length === 0 ? (
+            ) : (!notifications || notifications.length === 0) ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                 <Bell size={48} className="text-gray-300 mb-4" />
                 <p className="text-gray-700 font-semibold mb-2">No unread notifications</p>
@@ -182,8 +181,7 @@ const NotificationBell: React.FC = () => {
               notifications.map((notification, index) => (
                 <div 
                   key={notification.id} 
-                  className={`flex items-start gap-3 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 border-l-4 ${getPriorityColor(notification.priority)} animate-fade-in`}
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  className={`flex items-start gap-3 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 border-l-4 ${getPriorityColor(notification.priority)}`}
                 >
                   <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl">
                     {getNotificationIcon(notification.type)}
@@ -201,14 +199,14 @@ const NotificationBell: React.FC = () => {
                   <div className="flex gap-1 flex-shrink-0">
                     <button
                       onClick={() => handleMarkAsRead(notification.id)}
-                      className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 hover:-translate-y-0.5"
+                      className="p-1.5 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
                       title="Mark as read"
                     >
                       <Check size={16} />
                     </button>
                     <button
                       onClick={(e) => handleDelete(notification.id, e)}
-                      className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 hover:-translate-y-0.5"
+                      className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
                       title="Delete"
                     >
                       <Trash2 size={16} />
@@ -220,11 +218,11 @@ const NotificationBell: React.FC = () => {
           </div>
 
           {/* Footer */}
-          {notifications.length > 0 && (
+          {notifications && notifications.length > 0 && (
             <div className="bg-gray-50 px-5 py-3 text-center border-t border-gray-200">
               <a 
                 href="/notifications" 
-                className="text-primary-500 hover:text-primary-700 font-semibold text-sm transition-colors duration-200"
+                className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
               >
                 View all notifications
               </a>

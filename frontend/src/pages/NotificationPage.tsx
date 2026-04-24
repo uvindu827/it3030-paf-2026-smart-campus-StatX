@@ -27,22 +27,38 @@ const NotificationsPage: React.FC = () => {
     try {
       if (filter === 'unread') {
         const data = await notificationService.getUnreadNotifications();
-        setNotifications(data);
-        setTotalElements(data.length);
+        // Ensure data is an array
+        const unreadList = Array.isArray(data) ? data : [];
+        setNotifications(unreadList);
+        setTotalElements(unreadList.length);
         setTotalPages(1);
       } else {
         const data = await notificationService.getAllNotifications(currentPage, pageSize);
-        setNotifications(data.content);
-        setTotalPages(data.totalPages);
-        setTotalElements(data.totalElements);
+        
+        // HATEOAS Fix: Extract content from the object we returned in the service
+        const content = Array.isArray(data.content) ? data.content : [];
+        setNotifications(content);
+        setTotalPages(data.totalPages || 0);
+        setTotalElements(data.totalElements || 0);
       }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
       toast.error('Failed to load notifications');
+      setNotifications([]); // Fallback to empty array on error
     } finally {
       setLoading(false);
     }
   };
+
+  // ADD GUARDS HERE: Ensure notifications is an array before filtering
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
+
+  const filteredNotifications = typeFilter === 'all' 
+    ? safeNotifications 
+    : safeNotifications.filter(n => n.type === typeFilter);
+
+  const unreadCount = safeNotifications.filter(n => !n.isRead).length;
+  const highPriorityCount = safeNotifications.filter(n => n.priority === 'HIGH').length;
 
   const handleMarkAsRead = async (notificationId: number) => {
     try {
@@ -99,14 +115,7 @@ const NotificationsPage: React.FC = () => {
     };
     return styles[priority] || 'bg-blue-100 text-blue-700 border-blue-300';
   };
-
-  const filteredNotifications = typeFilter === 'all' 
-    ? notifications 
-    : notifications.filter(n => n.type === typeFilter);
-
-  const unreadCount = notifications.filter(n => !n.isRead).length;
-  const highPriorityCount = notifications.filter(n => n.priority === 'HIGH').length;
-
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
