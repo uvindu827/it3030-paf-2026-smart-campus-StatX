@@ -124,6 +124,7 @@ function AppContent() {
             <Route path="bookings" element={<AdminBookingManagement />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="/admin/tickets" element={<TicketList />} />
+            <Route path="/admin/facilities" element={<ResourcesPage />} />
           </Route>
 
           {/* CATCH-ALL REDIRECT */}

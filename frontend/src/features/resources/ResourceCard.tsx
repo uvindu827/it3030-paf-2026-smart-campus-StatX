@@ -36,11 +36,6 @@ const ResourceCard: React.FC<Props> = ({
   const navigate = useNavigate();
   const isActive = resource.status === "ACTIVE";
 
-  const handleReportIssue = () => {
-    // Navigate to create ticket and pass resource info via URL params
-    navigate(`/create-ticket?resId=${resource.id}&resName=${encodeURIComponent(resource.name)}`);
-  };
-
   return (
     <div
       style={{
@@ -96,11 +91,6 @@ const ResourceCard: React.FC<Props> = ({
       <div style={{ display: "flex", gap: "8px", marginTop: "16px", flexWrap: "wrap" }}>
         <button onClick={() => onViewDetail(resource)} style={btnStyle("#6366f1", "#fff")}>
           View Details
-        </button>
-
-        {/* NEW REPORT BUTTON */}
-        <button onClick={handleReportIssue} style={btnStyle("#64748b", "#fff")}>
-          ⚠️ Report Issue
         </button>
 
         {isAdmin && (
