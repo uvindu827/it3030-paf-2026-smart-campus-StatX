@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 
 @RestController
-@RequestMapping("/api/notifications/preferences")
+@RequestMapping("/api/v1/notifications/preferences")
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin(origins = "*")
