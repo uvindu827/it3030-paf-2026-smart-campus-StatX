@@ -134,11 +134,18 @@ public class TicketService {
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found after status update."));
         initializeCollections(hydratedTicket);
 
-        //notify user about ticket status update
-        notificationHelper.notifyTicketStatusUpdate(
-            ticket.getReportedByUserId(), 
-            ticket.getId(), 
-            ticket.getStatus().name());
+        // 🚨 THE FIX: Run the notification in a background thread!
+        // If the teammate's notification code fails, it will NO LONGER rollback your database transaction.
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                notificationHelper.notifyTicketStatusUpdate(
+                    hydratedTicket.getReportedByUserId(), 
+                    hydratedTicket.getId(), 
+                    hydratedTicket.getStatus().name());
+            } catch (Exception e) {
+                System.err.println("Notification failed (Backend issue), but ticket saved successfully: " + e.getMessage());
+            }
+        });
 
         return mapToResponse(hydratedTicket);
     }

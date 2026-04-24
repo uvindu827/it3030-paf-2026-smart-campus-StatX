@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UploadCloud, ShieldAlert } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function CreateTicket() {
   const [formData, setFormData] = useState({
@@ -41,11 +42,11 @@ export default function CreateTicket() {
       });
       
       if (response.ok) {
-        alert("Success! Ticket created perfectly.");
+        toast.success("Success! Ticket created perfectly. 🚀"); // <-- CHANGED
         setFormData({ resourceId: '', reporterUserId: '', contactDetails: '', category: 'Electrical', priority: 'High', description: '' });
         setFiles([]);
       } else {
-        alert(`Ticket creation failed: ${response.status}`);
+        toast.error(`Ticket creation failed: ${response.status}`); // <-- CHANGED
       }
     } catch (error) {
       console.error("API Error:", error);
