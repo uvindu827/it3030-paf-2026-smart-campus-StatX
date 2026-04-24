@@ -99,11 +99,11 @@ function AppContent() {
 
           <Route 
             path="/resources" 
-            element={isAuthenticated ? <ResourcesPage /> : <Navigate to="/login" />} 
+            element={isAuthenticated ? <UserResourcesPage /> : <Navigate to="/login" />} 
           />
           <Route 
             path="/browse" 
-            element={isAuthenticated ? <UserResourcesPage /> : <Navigate to="/login" />} 
+            element={isAuthenticated ? <ResourcesPage /> : <Navigate to="/login" />} 
           />
           <Route 
             path="/notifications" 

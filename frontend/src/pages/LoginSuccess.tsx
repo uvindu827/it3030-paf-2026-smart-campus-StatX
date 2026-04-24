@@ -9,6 +9,8 @@ const LoginSuccess = () => {
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
         const role = params.get('role');
+        const userId = params.get("userId");
+        const email = params.get("email");
 
         if (token) {
             localStorage.setItem('token', token);

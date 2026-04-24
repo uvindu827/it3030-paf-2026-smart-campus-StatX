@@ -1,5 +1,6 @@
 package com.paf_project.smartcampus.service;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.paf_project.smartcampus.dto.CreateNotificationRequest;
@@ -42,6 +43,7 @@ public class NotificationHelper {
     }
 
     //ticket notifications
+    @Async
     public void notifyTicketStatusUpdate(
         Long userId, 
         Long ticketId, 

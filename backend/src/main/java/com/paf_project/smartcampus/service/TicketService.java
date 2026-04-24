@@ -16,6 +16,8 @@ import com.paf_project.smartcampus.repository.TicketAttachmentRepository;
 import com.paf_project.smartcampus.repository.TicketRepository;
 import com.paf_project.smartcampus.repository.TicketCommentRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Slf4j
 public class TicketService {
 
     private static final int MAX_ATTACHMENTS = 3;
@@ -41,18 +44,18 @@ public class TicketService {
     private final TicketAttachmentRepository ticketAttachmentRepository;
     private final TicketCommentRepository ticketCommentRepository;
     private final Path uploadRoot;
-
-    @Autowired
-    private NotificationHelper notificationHelper;
+    private final NotificationHelper notificationHelper;
 
     public TicketService(
             TicketRepository ticketRepository,
             TicketAttachmentRepository ticketAttachmentRepository,
-            TicketCommentRepository ticketCommentRepository, // <--- ADD THIS
+            TicketCommentRepository ticketCommentRepository,
+            NotificationHelper notificationHelper, // Added here
             @Value("${app.ticket-uploads.dir:uploads/tickets}") String uploadDirectory) {
         this.ticketRepository = ticketRepository;
         this.ticketAttachmentRepository = ticketAttachmentRepository;
-        this.ticketCommentRepository = ticketCommentRepository; // <--- ADD THIS
+        this.ticketCommentRepository = ticketCommentRepository;
+        this.notificationHelper = notificationHelper; // Assigned here
         this.uploadRoot = Paths.get(uploadDirectory).toAbsolutePath().normalize();
     }
 
@@ -130,24 +133,21 @@ public class TicketService {
         }
 
         Ticket savedTicket = ticketRepository.save(ticket);
-        Ticket hydratedTicket = ticketRepository.findById(savedTicket.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found after status update."));
-        initializeCollections(hydratedTicket);
+        
+        // Hydrate before sending notification to ensure data integrity
+        initializeCollections(savedTicket);
 
-        // 🚨 THE FIX: Run the notification in a background thread!
-        // If the teammate's notification code fails, it will NO LONGER rollback your database transaction.
-        java.util.concurrent.CompletableFuture.runAsync(() -> {
-            try {
-                notificationHelper.notifyTicketStatusUpdate(
-                    hydratedTicket.getReportedByUserId(), 
-                    hydratedTicket.getId(), 
-                    hydratedTicket.getStatus().name());
-            } catch (Exception e) {
-                System.err.println("Notification failed (Backend issue), but ticket saved successfully: " + e.getMessage());
-            }
-        });
+        log.info("Attempting to notify user {} about ticket {}", savedTicket.getReportedByUserId(), savedTicket.getId());
 
-        return mapToResponse(hydratedTicket);
+        // Notify via the helper - Wrapped in try/catch to ensure 
+        // a notification failure doesn't kill the status update.
+        notificationHelper.notifyTicketStatusUpdate(
+            savedTicket.getReportedByUserId(),
+            savedTicket.getId(),
+            savedTicket.getStatus().name()
+        );
+
+        return mapToResponse(savedTicket);
     }
 
     //new
