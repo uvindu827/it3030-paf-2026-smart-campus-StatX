@@ -16,6 +16,7 @@ import TicketListPage from "./pages/TicketListPage";
 import NotificationsPage from "./pages/NotificationPage";
 import NotificationSettingsPage from "./pages/NotificationSettings";
 import UserManagement from "./pages/admin/UserManagement";
+import TicketList from "./components/TicketList";
 
 // ✨ NEW SEPARATED TICKET PAGES ✨
 import CreateTicket from "./components/CreateTicket";
@@ -122,6 +123,7 @@ function AppContent() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="bookings" element={<AdminBookingManagement />} />
             <Route path="users" element={<UserManagement />} />
+            <Route path="/admin/tickets" element={<TicketList />} />
           </Route>
 
           {/* CATCH-ALL REDIRECT */}
