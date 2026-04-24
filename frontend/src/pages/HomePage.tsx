@@ -117,6 +117,25 @@ function HomePage() {
               <Link to="/notifications" className="text-sm font-semibold text-purple-600 hover:underline">View Notifications</Link>
             </div>
           </div>
+
+          {/* Maintenance & Support (Ticket Creation) */}
+          <div className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl">
+            <div>
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-2xl group-hover:bg-red-600 transition-colors">🛠️</div>
+              <h2 className="text-xl font-bold text-slate-900">Report an Issue</h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-500">
+                Found a broken light or network issues? Create a support ticket here.
+              </p>
+            </div>
+            <div className="mt-8 flex items-center justify-between">
+              <Link 
+                to="/create-ticket" 
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700 transition-all"
+              >
+                Create Ticket
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
 

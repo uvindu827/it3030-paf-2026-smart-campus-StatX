@@ -54,7 +54,7 @@ const AdminSidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     { title: 'Dashboard', icon: LayoutDashboard, path: '/admin', badge: null },
     { title: 'Booking Management', icon: Calendar, path: '/admin/bookings', badge: null },
     { title: 'Facility Management', icon: Building2, path: '/admin/facilities', badge: null },
-    { title: 'Ticket Management', icon: Ticket, path: '/admin/tickets', badge: 'Coming Soon' },
+    { title: 'Ticket Management', icon: Ticket, path: '/admin/tickets', badge: null },
     { title: 'User Management', icon: Users, path: '/admin/users', badge: null },
   ];
 
