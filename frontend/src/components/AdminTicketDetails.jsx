@@ -143,72 +143,65 @@ export default function AdminTicketDetails() {
 
   const getDisplayUrl = (path) => {
     if (!path) return "";
-    // This regex splits by forward slash OR backslash to grab just the end filename
     const fileName = path.split(/[\\/]/).pop();
     return `http://localhost:8080/uploads/tickets/${fileName}`;
   };
 
   return (
     <div className="min-h-screen bg-slate-50 p-8 flex justify-center">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col min-h-[700px]">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 flex flex-col min-h-[700px]">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full text-slate-500 font-bold animate-pulse">Loading...</div>
+          <div className="flex items-center justify-center h-full text-indigo-500 font-bold animate-pulse flex-col gap-4">
+            <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            Loading Dashboard...
+          </div>
         ) : !ticketDetails ? (
-          <div className="flex items-center justify-center h-full">No ticket found.</div>
+          <div className="flex items-center justify-center h-full text-slate-500 font-bold">No ticket found.</div>
         ) : (
           <>
-            <div className="flex justify-between items-start mb-6">
-              <div className="max-w-xl">
-                <h1 className="text-3xl font-bold text-slate-900 mb-3">{ticketDetails.category} Incident</h1>
-                <p className="text-sm text-slate-500 mb-4">{ticketDetails.description}</p>
-                <div className="flex gap-2">
-                  <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full uppercase">{ticketDetails.category}</span>
-                  <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase ${ticketDetails.priority === 'CRITICAL' || ticketDetails.priority === 'HIGH' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                    {ticketDetails.priority} PRIORITY
-                  </span>
+            {/* ✨ UPGRADED DASHBOARD HEADER (LIGHT THEME) ✨ */}
+            <div className="bg-white rounded-2xl p-6 mb-8 text-slate-800 relative overflow-hidden shadow-sm border-2 border-indigo-100">
+              <div className="relative z-10 flex justify-between items-start">
+                <div className="max-w-xl">
+                  <div className="flex gap-2 mb-3">
+                    <span className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-black rounded-full uppercase tracking-wider">
+                      {ticketDetails.category}
+                    </span>
+                    <span className={`px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm ${ticketDetails.priority === 'CRITICAL' || ticketDetails.priority === 'HIGH' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-orange-50 text-orange-700 border border-orange-200'}`}>
+                      {ticketDetails.priority} PRIORITY
+                    </span>
+                  </div>
+                  <h1 className="text-3xl font-black mb-2 tracking-tight text-indigo-950">{ticketDetails.category} Incident</h1>
+                  <p className="text-slate-500 text-sm font-medium leading-relaxed">{ticketDetails.description}</p>
                 </div>
-              </div>
-              <div className="flex flex-col items-end">
-                 <div className="flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-lg text-indigo-900 font-mono text-sm font-bold">
-                   <Clock className="w-5 h-5" /> {formatDate(ticketDetails.createdAt)}
-                 </div>
+                <div className="flex flex-col items-end">
+                  <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 font-mono text-xs font-bold shadow-sm border border-slate-200">
+                    <Clock className="w-4 h-4 text-indigo-400" /> {formatDate(ticketDetails.createdAt)}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* ✨ SUPER-SAFE ATTACHMENTS SECTION ✨ */}
             {ticketDetails.attachments && ticketDetails.attachments.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-xs font-bold text-slate-400 mb-3 tracking-wider flex items-center gap-2">
-                  <Paperclip className="w-4 h-4" /> ATTACHMENTS
+              <div className="mb-8">
+                <h3 className="text-[11px] font-black text-slate-400 mb-3 tracking-widest flex items-center gap-2 uppercase">
+                  <Paperclip className="w-4 h-4" /> Evidence Attached
                 </h3>
                 <div className="flex flex-wrap gap-4">
                   {ticketDetails.attachments.map((attachment, index) => {
-                    // 1. Try to find the path in any possible field name
                     const rawPath = attachment.filePath || attachment.path || (typeof attachment === 'string' ? attachment : null);
-                    
-                    if (!rawPath) return null; // Skip if we can't find a path
-
-                    // 2. Extract just the filename (e.g., "1-screenshot.png")
+                    if (!rawPath) return null; 
                     const fileName = rawPath.split(/[\\/]/).pop();
                     const fullImageUrl = `http://localhost:8080/uploads/tickets/${fileName}`;
 
                     return (
-                      <a 
-                        key={attachment.id || index} 
-                        href={fullImageUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="block group"
-                      >
-                        <div className="relative overflow-hidden rounded-lg border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                      <a key={attachment.id || index} href={fullImageUrl} target="_blank" rel="noopener noreferrer" className="block group">
+                        <div className="relative overflow-hidden rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md hover:border-indigo-300">
                           <img 
                             src={fullImageUrl} 
                             alt={`Attachment ${index + 1}`} 
-                            className="max-h-48 w-auto object-cover transition-transform group-hover:scale-105"
-                            onError={(e) => {
-                              console.error("Image failed to load:", fullImageUrl);
-                              e.target.src = "https://placehold.co/200x150?text=Image+Not+Found";
-                            }} 
+                            className="h-32 w-48 object-cover transition-transform group-hover:scale-105"
+                            onError={(e) => { e.target.src = "https://placehold.co/200x150?text=Image+Not+Found"; }} 
                           />
                         </div>
                       </a>
@@ -217,53 +210,91 @@ export default function AdminTicketDetails() {
                 </div>
               </div>
             )}
-            
 
-            <div className="flex justify-between items-center border-y border-slate-100 py-4 mb-6">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-slate-500">Status:</span>
+            <div className="flex justify-between items-center border-y border-slate-100 py-5 mb-8">
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Current Status:</span>
                 <select 
                   value={ticketDetails.status?.toUpperCase() || 'OPEN'} 
                   onChange={handleStatusChange} 
-                  className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800"
+                  className={`border rounded-xl px-4 py-2 text-sm font-bold outline-none cursor-pointer transition-all shadow-sm
+                    ${ticketDetails.status === 'OPEN' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' : 
+                      ticketDetails.status === 'IN_PROGRESS' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' : 
+                      ticketDetails.status === 'RESOLVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 
+                      'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'}`}
                 >
-                  <option value="OPEN">Open</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="RESOLVED">Resolved</option>
-                  <option value="CLOSED">Closed</option>
+                  <option value="OPEN">🔵 Open</option>
+                  <option value="IN_PROGRESS">🟠 In Progress</option>
+                  <option value="RESOLVED">🟢 Resolved</option>
+                  <option value="CLOSED">⚫ Closed</option>
                 </select>
               </div>
             </div>
 
-            <h3 className="text-xs font-bold text-slate-400 mb-4 tracking-wider">COMMENTS</h3>
-            <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-              {ticketDetails.comments?.map((comment) => (
-                <div key={comment.id} className="bg-slate-50 rounded-xl p-4 flex gap-4 relative">
-                   <div className="w-8 h-8 rounded-full bg-indigo-200 text-indigo-700 flex items-center justify-center text-xs font-bold">U{comment.authorUserId}</div>
-                   <div className="flex-1">
-                     <div className="flex justify-between mb-1">
-                       <span className="text-sm font-bold">User {comment.authorUserId}</span>
-                       <span className="text-xs text-slate-400">{formatDate(comment.createdAt)}</span>
-                     </div>
-                     <p className="text-sm text-slate-600">{comment.commentText}</p>
-                   </div>
-                   {comment.authorUserId === LOGGED_IN_USER_ID && (
-                     <button onClick={() => handleDeleteComment(comment.id, comment.authorUserId)} className="text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
-                   )}
-                </div>
-              ))}
+            <h3 className="text-[11px] font-black text-slate-400 mb-6 tracking-widest flex items-center gap-2 uppercase">
+              Activity Timeline
+            </h3>
+            
+            <div className="flex-1 overflow-y-auto mb-6 relative pl-2 pr-2">
+              <div className="absolute left-[25px] top-2 bottom-2 w-0.5 bg-slate-200 z-0"></div>
+              
+              <div className="space-y-6 relative z-10">
+                {ticketDetails.comments?.map((comment) => (
+                  <div key={comment.id} className="flex gap-4 group">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-white border-4 border-slate-50 text-indigo-600 flex items-center justify-center text-xs font-black shadow-sm z-10 ring-1 ring-slate-200">
+                      U{comment.authorUserId}
+                    </div>
+                    
+                    <div className="flex-1 bg-white border border-slate-200 shadow-sm rounded-2xl rounded-tl-none p-5 transition-all hover:shadow-md hover:border-slate-300 relative">
+                      <div className="absolute -left-2 top-0 w-4 h-4 bg-white border-l border-b border-slate-200 transform rotate-45 rounded-sm"></div>
+                      
+                      <div className="flex justify-between items-start mb-2 relative z-10">
+                        <span className="text-sm font-bold text-slate-800">User {comment.authorUserId}</span>
+                        <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                          {formatDate(comment.createdAt)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-600 relative z-10 leading-relaxed">
+                        {comment.commentText}
+                      </p>
+                      
+                      {comment.authorUserId === LOGGED_IN_USER_ID && (
+                        <button 
+                          onClick={() => handleDeleteComment(comment.id, comment.authorUserId)} 
+                          className="absolute right-4 bottom-4 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 bg-slate-50 p-2 rounded-lg"
+                          title="Delete note"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="relative">
+            {/* ✨ UPGRADED COMMENT INPUT ✨ */}
+            <div className="relative mt-2">
                <input 
                  type="text" 
                  value={newComment}
                  onChange={(e) => setNewComment(e.target.value)}
                  onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
-                 placeholder="Add a note..." 
-                 className="w-full bg-slate-100 rounded-xl pl-4 pr-12 py-4 text-sm" 
+                 placeholder="Type a resolution note or update..." 
+                 className="w-full bg-white border-2 border-slate-100 rounded-2xl pl-5 pr-16 py-4 text-sm font-medium transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none shadow-sm placeholder:text-slate-400" 
+                 disabled={isSubmittingComment}
                />
-               <button onClick={handleAddComment} className="absolute right-4 top-4 text-indigo-600"><Send className="w-5 h-5" /></button>
+               <button 
+                 onClick={handleAddComment} 
+                 disabled={isSubmittingComment || !newComment.trim()}
+                 className="absolute right-2 top-2 bottom-2 aspect-square bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white rounded-xl flex items-center justify-center transition-all shadow-md"
+               >
+                 {isSubmittingComment ? (
+                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                 ) : (
+                   <Send className="w-4 h-4 ml-0.5" />
+                 )}
+               </button>
             </div>
           </>
         )}
