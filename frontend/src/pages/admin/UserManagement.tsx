@@ -25,13 +25,20 @@ const UserManagement: React.FC = () => {
   useEffect(() => { fetchUsers(); }, []);
 
   const handleDelete = async (id: number) => {
+    console.log("Attempting to delete user with ID:", id); // Check this in browser console
+    if (!id) {
+      toast.error("Invalid User ID");
+      return;
+    }
+    
     try {
       await deleteUser(id);
+      setUsers(users.filter(u => u.userId !== id));
       toast.success("User removed successfully");
-      setUsers(users.filter(u => u.userId !== id)); // Update UI instantly
       setShowConfirm(null);
-    } catch (error) {
-      toast.error("Could not delete user");
+    } catch (error: any) {
+      console.error("Server Error Detail:", error.response?.data);
+      toast.error("Server rejected delete. Check backend logs.");
     }
   };
 

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.paf_project.smartcampus.model.User;
+import com.paf_project.smartcampus.repository.BookingRepository;
+import com.paf_project.smartcampus.repository.NotificationRepository;
 import com.paf_project.smartcampus.repository.UserRepository;
 
 @Service
@@ -14,6 +16,12 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
 
     public User processOAuthPostLogin(String email, String name){
         
@@ -42,10 +50,14 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new RuntimeException("User not found with id: " + userId);
-        }
-        userRepository.deleteById(userId);
-    }
+        // Better way to delete to ensure Hibernate tracks it
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        notificationRepository.deleteByUserId(userId);
+        bookingRepository.deleteByUserId(userId);
         
+        userRepository.delete(user);
+    }
+            
 }

@@ -150,7 +150,7 @@ export const notificationService = {
    * Update notification preferences
    */
   async updatePreferences(preferences: Record<string, boolean>): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/preferences`, {
+    const response = await fetch(`${API_BASE_URL}/preferences/update`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify({ preferences }),

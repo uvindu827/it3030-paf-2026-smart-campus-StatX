@@ -42,6 +42,8 @@ public class SecurityConfig {
                             "/swagger-ui/**",
                             "/v3/api-docs/**"
                         ).permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/v1/users/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/v1/users/**").authenticated()
                         .anyRequest().authenticated())
                 .oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler))
                 .exceptionHandling(ex -> ex

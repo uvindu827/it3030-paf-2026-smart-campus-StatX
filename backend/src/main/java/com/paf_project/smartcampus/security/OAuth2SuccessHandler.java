@@ -1,7 +1,6 @@
 package com.paf_project.smartcampus.security;
 
 import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -22,7 +21,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private JwtUtils jwtUtils;
 
     @Autowired
-    private UserService userService; // Inject your service here
+    private UserService userService;
 
     @Override
     public void onAuthenticationSuccess(
@@ -34,18 +33,22 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String email = oauthUser.getAttribute("email");
         String name = oauthUser.getAttribute("name");
 
-        // 1. THIS IS THE KEY: Ensure user is created/fetched first
+        // 1. Fetch/Create user from DB
         User user = userService.processOAuthPostLogin(email, name);
 
-        // 2. Now you safely have the role
+        // 2. IMPORTANT FIX: Pass BOTH email and role to the token generator
+        // This ensures the JWT contains the "role" claim
         String role = user.getRole();
-        String token = jwtUtils.generateToken(email);
+        String token = jwtUtils.generateToken(email, role); 
 
-        // 3. Redirect with the confirmed role
+        // 3. Redirect to React
+        // We include name and email here too so your Sidebar can show them immediately
         String targetUrl = String.format(
-            "http://localhost:3000/login-success?token=%s&role=%s", 
+            "http://localhost:3000/login-success?token=%s&role=%s&name=%s&email=%s", 
             token, 
-            role
+            role,
+            name,
+            email
         );
         
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
