@@ -6,7 +6,10 @@ import com.paf_project.smartcampus.dto.BookingRequestDTO;
 import com.paf_project.smartcampus.dto.BookingResponseDTO;
 import com.paf_project.smartcampus.model.Booking;
 import com.paf_project.smartcampus.model.BookingStatus;
+import com.paf_project.smartcampus.model.User;
 import com.paf_project.smartcampus.repository.BookingRepository;
+import com.paf_project.smartcampus.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +22,25 @@ public class BookingService {
     @Autowired
     private BookingRepository bookingRepository;
 
-    // Create a new booking
-    public BookingResponseDTO createBooking(BookingRequestDTO requestDTO) {
-        Booking booking = mapToEntity(requestDTO);
+    @Autowired
+    private NotificationHelper notificationHelper;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    // Create a new booking
+    public BookingResponseDTO createBooking(BookingRequestDTO requestDTO, String userEmail) {
+        // 1. Find the user in the DB using the email from the token
+        User currentUser = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Booking booking = mapToEntity(requestDTO);
+        
+        // 2. Set the requestedBy field to the actual database User ID
+        booking.setUser(currentUser); 
+        booking.setRequestedBy(currentUser.getName());
+
+        // 3. Perform conflict check
         List<Booking> conflictingBookings = bookingRepository
                 .findByResourceNameAndBookingDateAndStartTimeLessThanAndEndTimeGreaterThan(
                         booking.getResourceName(),
@@ -65,6 +83,14 @@ public class BookingService {
         booking.setStatus(BookingStatus.APPROVED);
         booking.setAdminRemarks(remarks);
         Booking updatedBooking = bookingRepository.save(booking);
+
+        //notify user about booking approval
+        notificationHelper.notifyBookingApproved(
+            booking.getUser().getUserId(), // Clean and safe
+            booking.getId(),
+            booking.getResourceName(),
+            booking.getBookingDate().toString()
+        );
         return mapToResponseDTO(updatedBooking);
     }
 
@@ -74,6 +100,15 @@ public class BookingService {
         booking.setStatus(BookingStatus.REJECTED);
         booking.setAdminRemarks(remarks);
         Booking updatedBooking = bookingRepository.save(booking);
+
+        //notify user about booking rejection
+        notificationHelper.notifyBookingApproved(
+            booking.getUser().getUserId(), // Clean and safe
+            booking.getId(),
+            booking.getResourceName(),
+            booking.getBookingDate().toString()
+        );
+
         return mapToResponseDTO(updatedBooking);
     }
 
@@ -83,6 +118,14 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         booking.setAdminRemarks(remarks);
         Booking updatedBooking = bookingRepository.save(booking);
+
+         //notify user about booking cancellation
+        notificationHelper.notifyBookingcancelled(
+            Long.parseLong(booking.getRequestedBy()), 
+            booking.getId(), 
+            booking.getResourceName() 
+        );
+
         return mapToResponseDTO(updatedBooking);
     }
 
@@ -118,7 +161,22 @@ public class BookingService {
     public BookingResponseDTO updateBooking(Long id, BookingRequestDTO requestDTO) {
         Booking booking = findBookingEntityById(id);
 
-        // Update fields
+        // Check conflict against OTHER bookings only
+        List<Booking> conflictingBookings = bookingRepository
+                .findByResourceNameAndBookingDateAndStartTimeLessThanAndEndTimeGreaterThan(
+                        requestDTO.getResourceName(),
+                        requestDTO.getBookingDate(),
+                        requestDTO.getEndTime(),
+                        requestDTO.getStartTime());
+
+        boolean hasRealConflict = conflictingBookings.stream()
+                .anyMatch(existingBooking -> !existingBooking.getId().equals(id));
+
+        if (hasRealConflict) {
+            throw new RuntimeException("Booking conflict detected during update.");
+        }
+
+        // Update fields after conflict check
         booking.setResourceName(requestDTO.getResourceName());
         booking.setRequestedBy(requestDTO.getRequestedBy());
         booking.setBookingDate(requestDTO.getBookingDate());
@@ -126,18 +184,6 @@ public class BookingService {
         booking.setEndTime(requestDTO.getEndTime());
         booking.setPurpose(requestDTO.getPurpose());
         booking.setExpectedAttendees(requestDTO.getExpectedAttendees());
-
-        // Check conflict again
-        List<Booking> conflictingBookings = bookingRepository
-                .findByResourceNameAndBookingDateAndStartTimeLessThanAndEndTimeGreaterThan(
-                        booking.getResourceName(),
-                        booking.getBookingDate(),
-                        booking.getEndTime(),
-                        booking.getStartTime());
-
-        if (!conflictingBookings.isEmpty()) {
-            throw new RuntimeException("Booking conflict detected during update.");
-        }
 
         Booking updatedBooking = bookingRepository.save(booking);
         return mapToResponseDTO(updatedBooking);

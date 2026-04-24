@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "bookings")
 public class Booking {
@@ -47,6 +49,11 @@ public class Booking {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.EAGER) // Change LAZY to EAGER
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User user;
+
     public Booking() {
     }
 
@@ -57,6 +64,9 @@ public class Booking {
             this.status = BookingStatus.PENDING;
         }
     }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     public Long getId() {
         return id;

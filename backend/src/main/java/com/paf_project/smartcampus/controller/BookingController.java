@@ -7,6 +7,8 @@ import com.paf_project.smartcampus.dto.BookingRequestDTO;
 import com.paf_project.smartcampus.dto.BookingResponseDTO;
 import com.paf_project.smartcampus.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +23,13 @@ public class BookingController {
 
     // Create a new booking
     @PostMapping
-    public BookingResponseDTO createBooking(@RequestBody BookingRequestDTO requestDTO) {
-        return bookingService.createBooking(requestDTO);
-    }
+public ResponseEntity<BookingResponseDTO> createBooking(@RequestBody BookingRequestDTO requestDTO) {
+    // Extract email from the JWT (set by JwtAuthenticationFilter)
+    String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    
+    // Pass the email to the service
+    return ResponseEntity.ok(bookingService.createBooking(requestDTO, currentUserEmail));
+}
 
     // Get all bookings
     @GetMapping
@@ -71,5 +77,4 @@ public class BookingController {
         bookingService.deleteBooking(id);
         return "Booking deleted successfully";
     }
-
 }

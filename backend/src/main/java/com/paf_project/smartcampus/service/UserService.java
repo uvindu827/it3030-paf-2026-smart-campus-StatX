@@ -1,7 +1,10 @@
 package com.paf_project.smartcampus.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.paf_project.smartcampus.model.User;
 import com.paf_project.smartcampus.repository.UserRepository;
@@ -24,5 +27,25 @@ public class UserService {
                 return userRepository.save(newUser);
             });
     }
-    
+
+    public User createAdminUser(User adminData) {
+        User admin = new User();
+        admin.setName(adminData.getName());
+        admin.setEmail(adminData.getEmail());
+        admin.setRole("ROLE_ADMIN"); // Explicitly set admin role
+        return userRepository.save(admin);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found with id: " + userId);
+        }
+        userRepository.deleteById(userId);
+    }
+        
 }
