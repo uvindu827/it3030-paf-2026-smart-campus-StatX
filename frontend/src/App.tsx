@@ -149,7 +149,6 @@ function App() {
         pauseOnHover
         theme="light"
       />
-      <AppContent />
     </Router>
   );
 }

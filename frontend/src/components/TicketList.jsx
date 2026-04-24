@@ -165,29 +165,50 @@ function TicketList() {
                 ) : tickets.length === 0 ? (
                   <tr><td colSpan="6" className="text-center py-8 text-slate-500">No active tickets found.</td></tr>
                 ) : (
-                  tickets.map((ticket) => (
-                    <tr
-                      key={ticket.id}
-                      onClick={() => navigate(`/ticket/${ticket.id}`)}
-                      className="cursor-pointer rounded-xl bg-white text-sm text-slate-700 outline outline-1 outline-slate-100 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-sm"
-                    >
-                      <td className="rounded-l-xl px-3 py-3 font-semibold text-blue-900">#{ticket.id}</td>
-                      <td className="px-3 py-3 font-medium">{ticket.category}</td>
-                      <td className="px-3 py-3">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${priorityClasses[ticket.priority?.toUpperCase()] || "bg-slate-100 text-slate-700"}`}>
-                          {ticket.priority?.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="px-3 py-3">
-                        <span className="inline-flex items-center gap-2 font-medium">
-                          <span className={`h-2.5 w-2.5 rounded-full ${statusDotClasses[ticket.status?.toUpperCase()] || "bg-slate-300"}`} />
-                          {ticket.status?.toUpperCase().replace('_', ' ')}
-                        </span>
-                      </td>
-                      <td className="px-3 py-3 text-slate-500">{formatDateTime(ticket.createdAt)}</td>
-                      <td className="rounded-r-xl px-3 py-3 text-right text-slate-400">⋮</td>
-                    </tr>
-                  ))
+                  tickets.map((ticket) => {
+                    // ✨ INNOVATION: Row-level SLA calculation
+                    const isResolved = ticket.status?.toUpperCase() === 'RESOLVED' || ticket.status?.toUpperCase() === 'CLOSED';
+                    const ticketAgeHours = (new Date() - new Date(ticket.createdAt)) / (1000 * 60 * 60);
+                    const isOverdue = !isResolved && ticketAgeHours > 24;
+
+                    return (
+                      <tr
+                        key={ticket.id}
+                        onClick={() => navigate(`/ticket/${ticket.id}`)}
+                        className={`cursor-pointer rounded-xl text-sm transition hover:-translate-y-0.5 hover:shadow-sm outline outline-1 ${
+                          isOverdue 
+                            ? "bg-red-50/50 text-red-900 outline-red-200 hover:bg-red-50" 
+                            : "bg-white text-slate-700 outline-slate-100 hover:bg-slate-50"
+                        }`}
+                      >
+                        <td className="rounded-l-xl px-3 py-3 font-semibold text-blue-900">#{ticket.id}</td>
+                        <td className="px-3 py-3 font-medium">
+                          <div className="flex flex-col">
+                            <span>{ticket.category}</span>
+                            {/* 🚨 The Overdue Badge */}
+                            {isOverdue && (
+                              <span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600">
+                                ⚠️ SLA Breached
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3">
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${priorityClasses[ticket.priority?.toUpperCase()] || "bg-slate-100 text-slate-700"}`}>
+                            {ticket.priority?.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3">
+                          <span className="inline-flex items-center gap-2 font-medium">
+                            <span className={`h-2.5 w-2.5 rounded-full ${statusDotClasses[ticket.status?.toUpperCase()] || "bg-slate-300"}`} />
+                            {ticket.status?.toUpperCase().replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-slate-500">{formatDateTime(ticket.createdAt)}</td>
+                        <td className="rounded-r-xl px-3 py-3 text-right text-slate-400">⋮</td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

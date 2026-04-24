@@ -42,6 +42,7 @@ public class SecurityConfig {
                             "/swagger-ui/**",
                             "/v3/api-docs/**"
                         ).permitAll()
+                        .requestMatchers("/uploads/**").permitAll() // 👈 ADD THIS LINE HERE!
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/v1/users/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/v1/users/**").authenticated()
                         .anyRequest().authenticated())
