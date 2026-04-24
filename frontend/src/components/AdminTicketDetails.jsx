@@ -12,7 +12,6 @@ export default function AdminTicketDetails() {
   const LOGGED_IN_USER_ID = 12; 
   const { id } = useParams();
 
-  // Helper function to dynamically grab the JWT token your team set during login
   const getAuthToken = () => {
     return localStorage.getItem('token') || localStorage.getItem('jwt') || localStorage.getItem('jwtToken') || '';
   };
@@ -50,24 +49,19 @@ export default function AdminTicketDetails() {
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value; 
     const previousStatus = ticketDetails.status;
-    
-    // Optimistic UI update
     setTicketDetails({ ...ticketDetails, status: newStatus });
 
     try {
-      // THE BYPASS: We send empty strings to prevent the DB's "NOT NULL" Rollback crash
       const payload = { 
         status: newStatus,
         rejectedReason: "", 
         resolutionNotes: "" 
       };
 
-      // Safely grab token
-      const token = localStorage.getItem('token') || localStorage.getItem('jwt') || localStorage.getItem('jwtToken') || '';
+      const token = getAuthToken();
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      // URL exactly matches your controller. NO ?userId at the end!
       const response = await fetch(`http://localhost:8080/api/tickets/${ticketDetails.id}/status`, {
         method: 'PATCH',
         headers: headers,
@@ -147,6 +141,13 @@ export default function AdminTicketDetails() {
     return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
+  const getDisplayUrl = (path) => {
+    if (!path) return "";
+    // This regex splits by forward slash OR backslash to grab just the end filename
+    const fileName = path.split(/[\\/]/).pop();
+    return `http://localhost:8080/uploads/tickets/${fileName}`;
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 p-8 flex justify-center">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col min-h-[700px]">
@@ -173,6 +174,50 @@ export default function AdminTicketDetails() {
                  </div>
               </div>
             </div>
+
+            {/* ✨ SUPER-SAFE ATTACHMENTS SECTION ✨ */}
+            {ticketDetails.attachments && ticketDetails.attachments.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-xs font-bold text-slate-400 mb-3 tracking-wider flex items-center gap-2">
+                  <Paperclip className="w-4 h-4" /> ATTACHMENTS
+                </h3>
+                <div className="flex flex-wrap gap-4">
+                  {ticketDetails.attachments.map((attachment, index) => {
+                    // 1. Try to find the path in any possible field name
+                    const rawPath = attachment.filePath || attachment.path || (typeof attachment === 'string' ? attachment : null);
+                    
+                    if (!rawPath) return null; // Skip if we can't find a path
+
+                    // 2. Extract just the filename (e.g., "1-screenshot.png")
+                    const fileName = rawPath.split(/[\\/]/).pop();
+                    const fullImageUrl = `http://localhost:8080/uploads/tickets/${fileName}`;
+
+                    return (
+                      <a 
+                        key={attachment.id || index} 
+                        href={fullImageUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block group"
+                      >
+                        <div className="relative overflow-hidden rounded-lg border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                          <img 
+                            src={fullImageUrl} 
+                            alt={`Attachment ${index + 1}`} 
+                            className="max-h-48 w-auto object-cover transition-transform group-hover:scale-105"
+                            onError={(e) => {
+                              console.error("Image failed to load:", fullImageUrl);
+                              e.target.src = "https://placehold.co/200x150?text=Image+Not+Found";
+                            }} 
+                          />
+                        </div>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
 
             <div className="flex justify-between items-center border-y border-slate-100 py-4 mb-6">
               <div className="flex items-center gap-3">
