@@ -22,13 +22,11 @@ function TicketList() {
   const [isLoading, setIsLoading] = useState(true);
 
   // ✨ DYNAMIC DASHBOARD CALCULATIONS ✨
-  // We make sure to check both uppercase and Title case just in case the backend formatting changes!
   const highPriorityCount = tickets.filter(t => t.priority?.toUpperCase() === 'HIGH' || t.priority?.toUpperCase() === 'CRITICAL').length;
   const inProgressCount = tickets.filter(t => t.status?.toUpperCase() === 'OPEN' || t.status?.toUpperCase() === 'IN_PROGRESS').length;
   const unassignedCount = tickets.filter(t => !t.assignedTo).length; 
   const resolvedCount = tickets.filter(t => t.status?.toUpperCase() === 'RESOLVED' || t.status?.toUpperCase() === 'CLOSED').length;
 
-  // We moved this INSIDE the function so it can see your calculations above!
   const ticketStats = [
     { id: 1, label: "High Priority", value: highPriorityCount, accent: "text-red-600", iconBg: "bg-red-50", icon: "!" },
     { id: 2, label: "In Progress", value: inProgressCount, accent: "text-amber-600", iconBg: "bg-amber-50", icon: "◉" },
@@ -64,6 +62,17 @@ function TicketList() {
     return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
+  // 🌟 INNOVATION: Smart Dashboard Calculations
+  const activeTickets = tickets.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length;
+  const resolvedTickets = tickets.filter(t => t.status === 'RESOLVED' || t.status === 'CLOSED').length;
+  
+  // Calculate SLA Breaches (Tickets older than 24 hours that aren't resolved)
+  const slaBreachedTickets = tickets.filter(t => {
+    if (t.status === 'RESOLVED' || t.status === 'CLOSED') return false;
+    const ticketAgeHours = (new Date() - new Date(t.createdAt)) / (1000 * 60 * 60);
+    return ticketAgeHours > 24;
+  }).length;
+
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -74,18 +83,44 @@ function TicketList() {
             <h1 className="text-3xl font-bold text-slate-900">Active Tickets</h1>
             <p className="text-sm text-slate-500">Monitor and manage real-time campus security incidents and requests.</p>
           </div>
-          <button
-            type="button"
-            // Fixed the route here to match our new setup!
-            onClick={() => navigate('/create-ticket')}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
-          >
-            <span className="text-lg leading-none">+</span>
-            Create New Ticket
-          </button>
+          {/* Create Button removed here! */}
         </div>
 
-        {/* STATS ROW */}
+        {/* 🌟 INNOVATION: Premium Admin Analytics Dashboard */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Card 1: Active Workload */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Active Workload</h3>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-gray-900">{activeTickets}</span>
+              <span className="text-sm text-gray-500">Tickets Pending</span>
+            </div>
+          </div>
+
+          {/* Card 2: SLA Health */}
+          <div className={`p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 ${slaBreachedTickets > 0 ? 'bg-red-50 border-l-red-500' : 'bg-white border-l-green-500'}`}>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">SLA Health</h3>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className={`text-3xl font-bold ${slaBreachedTickets > 0 ? 'text-red-700' : 'text-gray-900'}`}>
+                {slaBreachedTickets}
+              </span>
+              <span className="text-sm text-gray-500">Overdue (&gt;24h)</span>
+            </div>
+          </div>
+
+          {/* Card 3: Resolution Rate */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-purple-500">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Resolved Total</h3>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-gray-900">{resolvedTickets}</span>
+              <span className="text-sm text-gray-500">Tickets Completed</span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* STATS ROW (Your original stats) */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {ticketStats.map((stat) => (
             <div key={stat.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -133,7 +168,6 @@ function TicketList() {
                   tickets.map((ticket) => (
                     <tr
                       key={ticket.id}
-                      // Fixed the route here to match our new setup!
                       onClick={() => navigate(`/ticket/${ticket.id}`)}
                       className="cursor-pointer rounded-xl bg-white text-sm text-slate-700 outline outline-1 outline-slate-100 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-sm"
                     >
@@ -147,7 +181,6 @@ function TicketList() {
                       <td className="px-3 py-3">
                         <span className="inline-flex items-center gap-2 font-medium">
                           <span className={`h-2.5 w-2.5 rounded-full ${statusDotClasses[ticket.status?.toUpperCase()] || "bg-slate-300"}`} />
-                          {/* Replaces underscores with spaces (e.g. IN_PROGRESS -> IN PROGRESS) */}
                           {ticket.status?.toUpperCase().replace('_', ' ')}
                         </span>
                       </td>
