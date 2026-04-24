@@ -3,13 +3,11 @@ package com.paf_project.smartcampus.utils;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
-import java.util.Date;
-
-import javax.crypto.SecretKey;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
 
 @Component
 public class JwtUtils {
@@ -19,9 +17,11 @@ public class JwtUtils {
     @Value("${app.jwt.expirationMs}")
     private long jwtExpiration;
 
-    public String generateToken(String email) {
+    // Updated to accept role
+    public String generateToken(String email, String role) {
         return Jwts.builder()
                 .subject(email)
+                .claim("role", role) 
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey())
@@ -33,5 +33,3 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
-
-

@@ -5,6 +5,7 @@ import com.paf_project.smartcampus.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,12 +35,18 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')") 
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable("id") Long id) { // Added explicit name mapping
         try {
             userService.deleteUser(id);
-            return ResponseEntity.ok("User deleted successfully");
+            return ResponseEntity.ok().body("{\"message\": \"User deleted successfully\"}"); // Return JSON, not raw string
         } catch (Exception e) {
+            e.printStackTrace(); // Look at your IDE console for the "real" error
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getMyAuthorities() {
+        return ResponseEntity.ok(SecurityContextHolder.getContext().getAuthentication().getAuthorities());
     }
 }
