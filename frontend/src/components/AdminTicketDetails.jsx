@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { Trash2, Clock, Send, Paperclip } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function AdminTicketDetails() {
   const [ticketDetails, setTicketDetails] = useState(null);
@@ -55,7 +56,7 @@ export default function AdminTicketDetails() {
         body: JSON.stringify(payload)
       });
       
-      if (!response.ok) alert("Failed to update status.");
+      if (!response.ok) toast.error("Failed to update status.");
     } catch (error) {
       console.error("API Error:", error);
     }
@@ -63,7 +64,7 @@ export default function AdminTicketDetails() {
 
   const handleDeleteComment = async (commentId, authorId) => {
     if (authorId !== LOGGED_IN_USER_ID) {
-      alert("403 Forbidden: You can only delete your own comments!");
+      toast.warning("You can only delete your own comments!");
       return;
     }
 
@@ -101,7 +102,7 @@ export default function AdminTicketDetails() {
         setTicketDetails(updatedTicket); 
         setNewComment(""); 
       } else {
-        alert("Failed to post comment.");
+        toast.error("Failed to post comment.");
       }
     } catch (error) {
       console.error("API Error adding comment:", error);
