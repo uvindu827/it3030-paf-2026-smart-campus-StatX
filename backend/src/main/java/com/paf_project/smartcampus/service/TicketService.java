@@ -5,13 +5,16 @@ import com.paf_project.smartcampus.dto.TicketCommentResponseDTO;
 import com.paf_project.smartcampus.dto.TicketCreateRequestDTO;
 import com.paf_project.smartcampus.dto.TicketResponseDTO;
 import com.paf_project.smartcampus.dto.TicketStatusUpdateRequestDTO;
+import com.paf_project.smartcampus.dto.TicketCommentRequestDTO;
 import com.paf_project.smartcampus.exception.BadRequestException;
 import com.paf_project.smartcampus.exception.ResourceNotFoundException;
 import com.paf_project.smartcampus.model.Ticket;
 import com.paf_project.smartcampus.model.TicketAttachment;
 import com.paf_project.smartcampus.model.TicketStatus;
+import com.paf_project.smartcampus.model.TicketComment;
 import com.paf_project.smartcampus.repository.TicketAttachmentRepository;
 import com.paf_project.smartcampus.repository.TicketRepository;
+import com.paf_project.smartcampus.repository.TicketCommentRepository;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,6 +39,7 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final TicketAttachmentRepository ticketAttachmentRepository;
+    private final TicketCommentRepository ticketCommentRepository;
     private final Path uploadRoot;
 
     @Autowired
@@ -44,9 +48,11 @@ public class TicketService {
     public TicketService(
             TicketRepository ticketRepository,
             TicketAttachmentRepository ticketAttachmentRepository,
+            TicketCommentRepository ticketCommentRepository, // <--- ADD THIS
             @Value("${app.ticket-uploads.dir:uploads/tickets}") String uploadDirectory) {
         this.ticketRepository = ticketRepository;
         this.ticketAttachmentRepository = ticketAttachmentRepository;
+        this.ticketCommentRepository = ticketCommentRepository; // <--- ADD THIS
         this.uploadRoot = Paths.get(uploadDirectory).toAbsolutePath().normalize();
     }
 
@@ -134,6 +140,30 @@ public class TicketService {
             ticket.getId(), 
             ticket.getStatus().name());
 
+        return mapToResponse(hydratedTicket);
+    }
+
+    //new
+    @Transactional
+    public TicketResponseDTO addComment(Long ticketId, TicketCommentRequestDTO request) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id: " + ticketId));
+
+        TicketComment comment = TicketComment.builder()
+                .ticket(ticket)
+                .authorUserId(request.getAuthorUserId())
+                .commentText(request.getCommentText())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        // Save the comment using the repository
+        ticketCommentRepository.save(comment);
+
+        // Fetch the updated ticket to return the fresh data
+        Ticket hydratedTicket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found after adding comment."));
+        initializeCollections(hydratedTicket);
         return mapToResponse(hydratedTicket);
     }
 
