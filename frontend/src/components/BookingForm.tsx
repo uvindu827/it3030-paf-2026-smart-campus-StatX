@@ -1,6 +1,7 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { Booking } from "../types/booking";
 import { useNavigate } from "react-router-dom";
+// @ts-ignore
 import "../App.css";
 import {
   FaRegCalendarAlt,
@@ -13,7 +14,7 @@ import {
 import { MdOutlineDescription } from "react-icons/md";
 
 interface BookingFormProps {
-  initialData: Booking | null;
+  initialData: Partial<Booking> | null; // Changed to Partial
   onSubmit: (data: Booking) => Promise<void> | void;
   submitButtonText: string;
 }
@@ -26,7 +27,7 @@ function BookingForm({
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<Booking>({
-    resourceName: "",
+    resourceName: initialData?.resourceName || "", // Set directly from initialData
     requestedBy: "",
     bookingDate: "",
     startTime: "",
@@ -41,21 +42,12 @@ function BookingForm({
 
   useEffect(() => {
     if (initialData) {
-      setFormData({
-        resourceName: initialData.resourceName || "",
-        requestedBy: initialData.requestedBy || "",
-        bookingDate: initialData.bookingDate || "",
-        startTime: initialData.startTime
-          ? initialData.startTime.slice(0, 5)
-          : "",
-        endTime: initialData.endTime ? initialData.endTime.slice(0, 5) : "",
-        purpose: initialData.purpose || "",
-        expectedAttendees: initialData.expectedAttendees || 0,
-        id: initialData.id,
-        status: initialData.status,
-        adminRemarks: initialData.adminRemarks,
-        createdAt: initialData.createdAt,
-      });
+      setFormData((prev) => ({
+        ...prev,
+        ...initialData,
+        startTime: initialData.startTime ? initialData.startTime.slice(0, 5) : prev.startTime,
+        endTime: initialData.endTime ? initialData.endTime.slice(0, 5) : prev.endTime,
+      }));
     }
   }, [initialData]);
 

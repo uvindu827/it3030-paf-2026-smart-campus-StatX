@@ -99,11 +99,11 @@ function AppContent() {
 
           <Route 
             path="/resources" 
-            element={isAuthenticated ? <ResourcesPage /> : <Navigate to="/login" />} 
+            element={isAuthenticated ? <UserResourcesPage /> : <Navigate to="/login" />} 
           />
           <Route 
             path="/browse" 
-            element={isAuthenticated ? <UserResourcesPage /> : <Navigate to="/login" />} 
+            element={isAuthenticated ? <ResourcesPage /> : <Navigate to="/login" />} 
           />
           <Route 
             path="/notifications" 
@@ -124,6 +124,7 @@ function AppContent() {
             <Route path="bookings" element={<AdminBookingManagement />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="/admin/tickets" element={<TicketList />} />
+            <Route path="/admin/facilities" element={<ResourcesPage />} />
           </Route>
 
           {/* CATCH-ALL REDIRECT */}

@@ -1,31 +1,42 @@
-import React, { useState } from 'react';
-import { UploadCloud, ShieldAlert, X, Loader2 } from 'lucide-react';
+
 import { toast } from 'react-toastify';
 
 export default function CreateTicket() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  // 1. Get Resource Info from URL
+  const resourceId = searchParams.get('resId');
+  const resourceName = searchParams.get('resName');
+
+  // 2. Get User Info from LocalStorage (Handling your specific keys)
+  const userEmail = localStorage.getItem('userEmail') || '';
+  // Note: Since your token/storage doesn't have numeric ID, we use 12 as fallback
+  // In a real app, your login should save 'userId' to localStorage.
+  const userId = localStorage.getItem('userId') || 12; 
+
   const [formData, setFormData] = useState({
-    resourceId: '',
-    reporterUserId: '',
-    contactDetails: '',
+    contactDetails: userEmail,
     category: 'Electrical',
-    priority: 'High',
+    priority: 'Medium',
     description: ''
   });
+  
   const [files, setFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const LOGGED_IN_USER_ID = 12; // Simulating the logged-in user
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (!resourceId) {
+      toast.error("No resource selected!");
+      return;
+    }
+
     setIsSubmitting(true);
-
     const data = new FormData();
-    const cleanResourceId = parseInt(formData.resourceId.replace(/\D/g, '')) || 1;
-    const cleanUserId = parseInt(formData.reporterUserId.replace(/\D/g, '')) || LOGGED_IN_USER_ID;
 
-    data.append('resourceId', cleanResourceId); 
-    data.append('reportedByUserId', cleanUserId);
+    data.append('resourceId', resourceId); 
+    data.append('reportedByUserId', userId);
     data.append('preferredContactDetails', formData.contactDetails);
     data.append('category', formData.category);
     data.append('priority', formData.priority.toUpperCase());
@@ -50,6 +61,7 @@ export default function CreateTicket() {
         toast.error(`Ticket creation failed: ${response.status}`);
       }
     } catch (error) {
+      toast.error("Connection error to server");
       console.error("API Error:", error);
       toast.error("Network error. Is the backend running?");
     } finally {
@@ -97,6 +109,7 @@ export default function CreateTicket() {
             </div>
           </div>
 
+        <form onSubmit={handleFormSubmit} className="space-y-5">
           <div>
             <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">CONTACT DETAILS</label>
             <input type="email" name="contactDetails" value={formData.contactDetails} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none hover:border-slate-300" placeholder="admin@campus.edu" required />

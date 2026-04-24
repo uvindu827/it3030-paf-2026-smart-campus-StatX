@@ -39,6 +39,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 2. IMPORTANT FIX: Pass BOTH email and role to the token generator
         // This ensures the JWT contains the "role" claim
         String role = user.getRole();
+        Long userId = user.getUserId();
         String token = jwtUtils.generateToken(email, role); 
 
         // 3. Redirect to React
@@ -48,7 +49,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             token, 
             role,
             name,
-            email
+            email,
+            userId
         );
         
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

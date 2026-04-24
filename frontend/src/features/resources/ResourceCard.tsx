@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { Resource } from "./resourceApi";
 
 interface Props {
@@ -32,6 +33,7 @@ const ResourceCard: React.FC<Props> = ({
   onToggleStatus,
   onViewDetail,
 }) => {
+  const navigate = useNavigate();
   const isActive = resource.status === "ACTIVE";
 
   return (
@@ -56,7 +58,6 @@ const ResourceCard: React.FC<Props> = ({
         (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
       }}
     >
-      {/* Status Badge */}
       <div
         style={{
           position: "absolute",
@@ -73,92 +74,32 @@ const ResourceCard: React.FC<Props> = ({
         {isActive ? "✓ Active" : "✗ Out of Service"}
       </div>
 
-      {/* Icon + Type */}
       <div style={{ fontSize: "36px", marginBottom: "8px" }}>
         {TYPE_ICONS[resource.type] || "📦"}
       </div>
-      <div
-        style={{
-          fontSize: "11px",
-          fontWeight: 600,
-          color: "#6366f1",
-          textTransform: "uppercase",
-          letterSpacing: "0.5px",
-          marginBottom: "4px",
-        }}
-      >
+      <div style={{ fontSize: "11px", fontWeight: 600, color: "#6366f1", textTransform: "uppercase", marginBottom: "4px" }}>
         {TYPE_LABELS[resource.type]}
       </div>
 
-      {/* Name */}
-      <h3
-        style={{
-          margin: "0 0 8px",
-          fontSize: "16px",
-          fontWeight: 700,
-          color: "#1e293b",
-        }}
-      >
+      <h3 style={{ margin: "0 0 8px", fontSize: "16px", fontWeight: 700, color: "#1e293b" }}>
         {resource.name}
       </h3>
 
-      {/* Meta */}
-      <div style={{ fontSize: "13px", color: "#64748b", marginBottom: "4px" }}>
-        📍 {resource.location}
-      </div>
-      <div style={{ fontSize: "13px", color: "#64748b", marginBottom: "4px" }}>
-        👥 Capacity: {resource.capacity}
-      </div>
-      {resource.availabilityWindows && (
-        <div style={{ fontSize: "13px", color: "#64748b", marginBottom: "4px" }}>
-          🕐 {resource.availabilityWindows}
-        </div>
-      )}
-      {resource.description && (
-        <p
-          style={{
-            fontSize: "12px",
-            color: "#94a3b8",
-            marginTop: "8px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          {resource.description}
-        </p>
-      )}
+      <div style={{ fontSize: "13px", color: "#64748b", marginBottom: "4px" }}>📍 {resource.location}</div>
+      <div style={{ fontSize: "13px", color: "#64748b", marginBottom: "4px" }}>👥 Capacity: {resource.capacity}</div>
 
-      {/* Actions */}
       <div style={{ display: "flex", gap: "8px", marginTop: "16px", flexWrap: "wrap" }}>
-        <button
-          onClick={() => onViewDetail(resource)}
-          style={btnStyle("#6366f1", "#fff")}
-        >
+        <button onClick={() => onViewDetail(resource)} style={btnStyle("#6366f1", "#fff")}>
           View Details
         </button>
+
         {isAdmin && (
           <>
-            <button
-              onClick={() => onEdit(resource)}
-              style={btnStyle("#f59e0b", "#fff")}
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => onToggleStatus(resource)}
-              style={btnStyle(isActive ? "#dc2626" : "#16a34a", "#fff")}
-            >
+            <button onClick={() => onEdit(resource)} style={btnStyle("#f59e0b", "#fff")}>Edit</button>
+            <button onClick={() => onToggleStatus(resource)} style={btnStyle(isActive ? "#dc2626" : "#16a34a", "#fff")}>
               {isActive ? "Disable" : "Enable"}
             </button>
-            <button
-              onClick={() => {
-                if (window.confirm(`Delete "${resource.name}"?`)) onDelete(resource.id);
-              }}
-              style={btnStyle("#ef4444", "#fff")}
-            >
+            <button onClick={() => { if (window.confirm(`Delete "${resource.name}"?`)) onDelete(resource.id); }} style={btnStyle("#ef4444", "#fff")}>
               Delete
             </button>
           </>
