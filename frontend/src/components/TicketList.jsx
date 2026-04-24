@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Ticket, AlertTriangle, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 
-// Updated to match your Java Backend Enums
+// Simplified to just text colors!
 const priorityClasses = {
-  CRITICAL: "bg-red-100 text-red-700",
-  HIGH: "bg-red-100 text-red-700",
-  MEDIUM: "bg-amber-100 text-amber-700",
-  LOW: "bg-blue-100 text-blue-700",
+  CRITICAL: "text-red-600",
+  HIGH: "text-red-600",
+  MEDIUM: "text-orange-500",
+  LOW: "text-blue-500",
 };
 
 const statusDotClasses = {
   OPEN: "bg-slate-400",
   IN_PROGRESS: "bg-blue-500",
-  RESOLVED: "bg-emerald-500",
+  RESOLVED: "bg-emerald-400",
   CLOSED: "bg-slate-800",
 };
 
@@ -20,19 +21,9 @@ function TicketList() {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // ✨ DYNAMIC DASHBOARD CALCULATIONS ✨
-  const highPriorityCount = tickets.filter(t => t.priority?.toUpperCase() === 'HIGH' || t.priority?.toUpperCase() === 'CRITICAL').length;
-  const inProgressCount = tickets.filter(t => t.status?.toUpperCase() === 'OPEN' || t.status?.toUpperCase() === 'IN_PROGRESS').length;
-  const unassignedCount = tickets.filter(t => !t.assignedTo).length; 
-  const resolvedCount = tickets.filter(t => t.status?.toUpperCase() === 'RESOLVED' || t.status?.toUpperCase() === 'CLOSED').length;
-
-  const ticketStats = [
-    { id: 1, label: "High Priority", value: highPriorityCount, accent: "text-red-600", iconBg: "bg-red-50", icon: "!" },
-    { id: 2, label: "In Progress", value: inProgressCount, accent: "text-amber-600", iconBg: "bg-amber-50", icon: "◉" },
-    { id: 3, label: "Unassigned", value: unassignedCount, accent: "text-slate-700", iconBg: "bg-slate-100", icon: "📋" },
-    { id: 4, label: "Resolved Today", value: resolvedCount, accent: "text-blue-600", iconBg: "bg-blue-50", icon: "✓" },
-  ];
+  
+  // ✨ NEW: State to track which tab is active
+  const [activeTab, setActiveTab] = useState('ALL');
 
   // Fetch real tickets from database
   useEffect(() => {
@@ -63,15 +54,21 @@ function TicketList() {
   };
 
   // 🌟 INNOVATION: Smart Dashboard Calculations
-  const activeTickets = tickets.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length;
-  const resolvedTickets = tickets.filter(t => t.status === 'RESOLVED' || t.status === 'CLOSED').length;
+  const activeTicketsCount = tickets.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length;
+  const highPriorityCount = tickets.filter(t => t.priority?.toUpperCase() === 'HIGH' || t.priority?.toUpperCase() === 'CRITICAL').length;
+  const resolvedCount = tickets.filter(t => t.status?.toUpperCase() === 'RESOLVED' || t.status?.toUpperCase() === 'CLOSED').length;
   
-  // Calculate SLA Breaches (Tickets older than 24 hours that aren't resolved)
-  const slaBreachedTickets = tickets.filter(t => {
+  // Calculate Overdue (Tickets older than 24 hours that aren't resolved)
+  const overdueTicketsCount = tickets.filter(t => {
     if (t.status === 'RESOLVED' || t.status === 'CLOSED') return false;
     const ticketAgeHours = (new Date() - new Date(t.createdAt)) / (1000 * 60 * 60);
     return ticketAgeHours > 24;
   }).length;
+
+  // ✨ NEW: Filter tickets based on the selected tab
+  const displayTickets = activeTab === 'EMERGENCY' 
+    ? tickets.filter(t => t.priority?.toUpperCase() === 'HIGH' || t.priority?.toUpperCase() === 'CRITICAL')
+    : tickets;
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-8">
@@ -83,90 +80,114 @@ function TicketList() {
             <h1 className="text-3xl font-bold text-slate-900">Active Tickets</h1>
             <p className="text-sm text-slate-500">Monitor and manage real-time campus security incidents and requests.</p>
           </div>
-          {/* Create Button removed here! */}
         </div>
 
-        {/* 🌟 INNOVATION: Premium Admin Analytics Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* ✨ UPGRADED ADMIN KPI DASHBOARD ✨ */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 mt-4">
           
-          {/* Card 1: Active Workload */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Active Workload</h3>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-gray-900">{activeTickets}</span>
-              <span className="text-sm text-gray-500">Tickets Pending</span>
-            </div>
-          </div>
-
-          {/* Card 2: SLA Health */}
-          <div className={`p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 ${slaBreachedTickets > 0 ? 'bg-red-50 border-l-red-500' : 'bg-white border-l-green-500'}`}>
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">SLA Health</h3>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className={`text-3xl font-bold ${slaBreachedTickets > 0 ? 'text-red-700' : 'text-gray-900'}`}>
-                {slaBreachedTickets}
-              </span>
-              <span className="text-sm text-gray-500">Overdue (&gt;24h)</span>
-            </div>
-          </div>
-
-          {/* Card 3: Resolution Rate */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-purple-500">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Resolved Total</h3>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-gray-900">{resolvedTickets}</span>
-              <span className="text-sm text-gray-500">Tickets Completed</span>
-            </div>
-          </div>
-
-        </div>
-
-        {/* STATS ROW (Your original stats) */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {ticketStats.map((stat) => (
-            <div key={stat.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-3">
-                <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold ${stat.iconBg} ${stat.accent}`}>
-                  {stat.icon}
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{stat.label}</p>
-                  <p className="mt-1 text-3xl font-extrabold text-slate-900">{stat.value}</p>
-                </div>
+          {/* 1. Active Tickets Card */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500 rounded-l-2xl"></div>
+            <div className="flex justify-between items-start pl-2">
+              <div>
+                <p className="text-[11px] font-black text-slate-400 tracking-widest uppercase mb-1">Active Workload</p>
+                <h3 className="text-3xl font-black text-slate-800">{activeTicketsCount}</h3>
+                <p className="text-xs font-medium text-slate-500 mt-2">Tickets Pending</p>
+              </div>
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
+                <Ticket className="w-5 h-5" />
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* TABLE COMPONENT */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm md:p-6">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <button className="rounded-full bg-blue-900 px-4 py-1.5 text-xs font-semibold text-white">All Tickets</button>
-              <button className="rounded-full px-4 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100">Emergency Only</button>
-            </div>
-            <div className="text-xs text-slate-400">Sort / Filter</div>
           </div>
 
+          {/* 2. High Priority Card */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-orange-500 rounded-l-2xl"></div>
+            <div className="flex justify-between items-start pl-2">
+              <div>
+                <p className="text-[11px] font-black text-slate-400 tracking-widest uppercase mb-1">High Priority</p>
+                <h3 className="text-3xl font-black text-slate-800">{highPriorityCount}</h3>
+                <p className="text-xs font-medium text-slate-500 mt-2">Needs Attention</p>
+              </div>
+              <div className="p-3 bg-orange-50 text-orange-600 rounded-xl group-hover:scale-110 transition-transform">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Overdue Card */}
+          <div className="bg-white rounded-2xl p-6 border border-red-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-red-500 rounded-l-2xl"></div>
+            <div className="flex justify-between items-start pl-2">
+              <div>
+                <p className="text-[11px] font-black text-red-400 tracking-widest uppercase mb-1">Overdue Tickets</p>
+                <h3 className="text-3xl font-black text-red-600">{overdueTicketsCount}</h3>
+                <p className="text-xs font-bold text-red-400 mt-2">&gt; 24h unresolved</p>
+              </div>
+              <div className="p-3 bg-red-50 text-red-600 rounded-xl group-hover:scale-110 transition-transform animate-pulse">
+                <Clock className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Resolved Card */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500 rounded-l-2xl"></div>
+            <div className="flex justify-between items-start pl-2">
+              <div>
+                <p className="text-[11px] font-black text-slate-400 tracking-widest uppercase mb-1">Resolved Total</p>
+                <h3 className="text-3xl font-black text-slate-800">{resolvedCount}</h3>
+                <p className="text-xs font-medium text-slate-500 mt-2">Tickets Completed</p>
+              </div>
+              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* ✨ UPGRADED TICKET TABLE ✨ */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8">
+          
+          {/* Table Header / Filters */}
+          <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+            <div className="flex gap-2 bg-slate-50 p-1 rounded-xl border border-slate-100">
+              <button 
+                onClick={() => setActiveTab('ALL')}
+                className={`px-5 py-2 rounded-lg text-xs tracking-wide transition-colors ${activeTab === 'ALL' ? 'bg-white text-indigo-700 font-black shadow-sm' : 'text-slate-500 hover:text-slate-700 font-bold'}`}
+              >
+                All Tickets
+              </button>
+              <button 
+                onClick={() => setActiveTab('EMERGENCY')}
+                className={`px-5 py-2 rounded-lg text-xs tracking-wide transition-colors ${activeTab === 'EMERGENCY' ? 'bg-white text-indigo-700 font-black shadow-sm' : 'text-slate-500 hover:text-slate-700 font-bold'}`}
+              >
+                Emergency Only
+              </button>
+            </div>
+          </div>
+
+          {/* Actual Table */}
           <div className="overflow-x-auto">
-            <table className="min-w-full border-separate border-spacing-y-2">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  <th className="px-3 py-2">Ticket ID</th>
-                  <th className="px-3 py-2">Category</th>
-                  <th className="px-3 py-2">Priority</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className="px-3 py-2">Date &amp; Time</th>
-                  <th className="px-3 py-2">Actions</th>
+                <tr className="bg-slate-50/50">
+                  <th className="py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Ticket ID</th>
+                  <th className="py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Category</th>
+                  <th className="py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Priority</th>
+                  <th className="py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Status</th>
+                  <th className="py-4 px-6 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Date & Time</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
-                  <tr><td colSpan="6" className="text-center py-8 text-slate-500 animate-pulse">Loading live tickets...</td></tr>
-                ) : tickets.length === 0 ? (
-                  <tr><td colSpan="6" className="text-center py-8 text-slate-500">No active tickets found.</td></tr>
+                  <tr><td colSpan="5" className="text-center py-8 text-slate-500 animate-pulse font-medium">Loading live tickets...</td></tr>
+                ) : displayTickets.length === 0 ? (
+                  <tr><td colSpan="5" className="text-center py-8 text-slate-500 font-medium">No tickets found for this filter.</td></tr>
                 ) : (
-                  tickets.map((ticket) => {
-                    // ✨ INNOVATION: Row-level SLA calculation
+                  displayTickets.map((ticket) => {
+                    // ✨ INNOVATION: Row-level Overdue calculation
                     const isResolved = ticket.status?.toUpperCase() === 'RESOLVED' || ticket.status?.toUpperCase() === 'CLOSED';
                     const ticketAgeHours = (new Date() - new Date(ticket.createdAt)) / (1000 * 60 * 60);
                     const isOverdue = !isResolved && ticketAgeHours > 24;
@@ -175,37 +196,39 @@ function TicketList() {
                       <tr
                         key={ticket.id}
                         onClick={() => navigate(`/ticket/${ticket.id}`)}
-                        className={`cursor-pointer rounded-xl text-sm transition hover:-translate-y-0.5 hover:shadow-sm outline outline-1 ${
-                          isOverdue 
-                            ? "bg-red-50/50 text-red-900 outline-red-200 hover:bg-red-50" 
-                            : "bg-white text-slate-700 outline-slate-100 hover:bg-slate-50"
-                        }`}
+                        className={`hover:bg-slate-50 transition-colors group cursor-pointer ${isOverdue ? 'bg-red-50/30' : ''}`}
                       >
-                        <td className="rounded-l-xl px-3 py-3 font-semibold text-blue-900">#{ticket.id}</td>
-                        <td className="px-3 py-3 font-medium">
-                          <div className="flex flex-col">
-                            <span>{ticket.category}</span>
-                            {/* 🚨 The Overdue Badge */}
-                            {isOverdue && (
-                              <span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600">
-                                ⚠️ SLA Breached
-                              </span>
-                            )}
-                          </div>
+                        <td className="py-4 px-6">
+                          <span className="text-sm text-slate-700 transition-colors">#{ticket.id}</span>
                         </td>
-                        <td className="px-3 py-3">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${priorityClasses[ticket.priority?.toUpperCase()] || "bg-slate-100 text-slate-700"}`}>
+                        <td className="py-4 px-6">
+                          <div className="text-sm text-slate-700">{ticket.category}</div>
+                        </td>
+                        <td className="py-4 px-6">
+                          {/* 💅 FIXED: Font now perfectly matches Status column! */}
+                          <span className={`text-xs font-bold tracking-wide uppercase ${priorityClasses[ticket.priority?.toUpperCase()] || "text-slate-500"}`}>
                             {ticket.priority?.toUpperCase()}
                           </span>
                         </td>
-                        <td className="px-3 py-3">
-                          <span className="inline-flex items-center gap-2 font-medium">
-                            <span className={`h-2.5 w-2.5 rounded-full ${statusDotClasses[ticket.status?.toUpperCase()] || "bg-slate-300"}`} />
-                            {ticket.status?.toUpperCase().replace('_', ' ')}
-                          </span>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${statusDotClasses[ticket.status?.toUpperCase()] || "bg-slate-300"}`}></span>
+                            <span className={`text-xs font-bold tracking-wide ${isResolved ? 'text-emerald-700' : 'text-slate-600'}`}>
+                              {ticket.status?.toUpperCase().replace('_', ' ')}
+                            </span>
+                          </div>
                         </td>
-                        <td className="px-3 py-3 text-slate-500">{formatDateTime(ticket.createdAt)}</td>
-                        <td className="rounded-r-xl px-3 py-3 text-right text-slate-400">⋮</td>
+                        <td className="py-4 px-6">
+                          {/* 💅 FIXED: Date column flexes to push the subtle overdue icon to the right edge */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-slate-500">
+                              {formatDateTime(ticket.createdAt)}
+                            </span>
+                            {isOverdue && (
+                              <AlertCircle className="w-4 h-4 text-slate-400 opacity-70" title="Overdue Ticket" />
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     );
                   })
@@ -213,9 +236,9 @@ function TicketList() {
               </tbody>
             </table>
           </div>
-
-          <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
-            <p>Showing {tickets.length} active tickets</p>
+          
+          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs font-semibold text-slate-400">
+            <p>Showing {displayTickets.length} tickets</p>
           </div>
         </div>
 
