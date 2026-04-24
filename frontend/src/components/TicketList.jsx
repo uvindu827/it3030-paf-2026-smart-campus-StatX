@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// We'll leave stats static for this step!
-const ticketStats = [
-  { id: 1, label: "High Priority", value: 12, accent: "text-red-600", iconBg: "bg-red-50", icon: "!" },
-  { id: 2, label: "In Progress", value: 28, accent: "text-amber-600", iconBg: "bg-amber-50", icon: "◉" },
-  { id: 3, label: "Unassigned", value: "05", accent: "text-slate-700", iconBg: "bg-slate-100", icon: "📋" },
-  { id: 4, label: "Resolved Today", value: 43, accent: "text-blue-600", iconBg: "bg-blue-50", icon: "✓" },
-];
-
 // Updated to match your Java Backend Enums
 const priorityClasses = {
   CRITICAL: "bg-red-100 text-red-700",
@@ -28,6 +20,21 @@ function TicketList() {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // ✨ DYNAMIC DASHBOARD CALCULATIONS ✨
+  // We make sure to check both uppercase and Title case just in case the backend formatting changes!
+  const highPriorityCount = tickets.filter(t => t.priority?.toUpperCase() === 'HIGH' || t.priority?.toUpperCase() === 'CRITICAL').length;
+  const inProgressCount = tickets.filter(t => t.status?.toUpperCase() === 'OPEN' || t.status?.toUpperCase() === 'IN_PROGRESS').length;
+  const unassignedCount = tickets.filter(t => !t.assignedTo).length; 
+  const resolvedCount = tickets.filter(t => t.status?.toUpperCase() === 'RESOLVED' || t.status?.toUpperCase() === 'CLOSED').length;
+
+  // We moved this INSIDE the function so it can see your calculations above!
+  const ticketStats = [
+    { id: 1, label: "High Priority", value: highPriorityCount, accent: "text-red-600", iconBg: "bg-red-50", icon: "!" },
+    { id: 2, label: "In Progress", value: inProgressCount, accent: "text-amber-600", iconBg: "bg-amber-50", icon: "◉" },
+    { id: 3, label: "Unassigned", value: unassignedCount, accent: "text-slate-700", iconBg: "bg-slate-100", icon: "📋" },
+    { id: 4, label: "Resolved Today", value: resolvedCount, accent: "text-blue-600", iconBg: "bg-blue-50", icon: "✓" },
+  ];
 
   // Fetch real tickets from database
   useEffect(() => {
@@ -69,7 +76,8 @@ function TicketList() {
           </div>
           <button
             type="button"
-            onClick={() => navigate('/ticket-dashboard')}
+            // Fixed the route here to match our new setup!
+            onClick={() => navigate('/create-ticket')}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
           >
             <span className="text-lg leading-none">+</span>
@@ -125,21 +133,22 @@ function TicketList() {
                   tickets.map((ticket) => (
                     <tr
                       key={ticket.id}
-                      onClick={() => navigate(`/ticket-dashboard/${ticket.id}`)}
+                      // Fixed the route here to match our new setup!
+                      onClick={() => navigate(`/ticket/${ticket.id}`)}
                       className="cursor-pointer rounded-xl bg-white text-sm text-slate-700 outline outline-1 outline-slate-100 transition hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-sm"
                     >
                       <td className="rounded-l-xl px-3 py-3 font-semibold text-blue-900">#{ticket.id}</td>
                       <td className="px-3 py-3 font-medium">{ticket.category}</td>
                       <td className="px-3 py-3">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${priorityClasses[ticket.priority] || "bg-slate-100 text-slate-700"}`}>
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${priorityClasses[ticket.priority?.toUpperCase()] || "bg-slate-100 text-slate-700"}`}>
                           {ticket.priority?.toUpperCase()}
                         </span>
                       </td>
                       <td className="px-3 py-3">
                         <span className="inline-flex items-center gap-2 font-medium">
-                          <span className={`h-2.5 w-2.5 rounded-full ${statusDotClasses[ticket.status] || "bg-slate-300"}`} />
+                          <span className={`h-2.5 w-2.5 rounded-full ${statusDotClasses[ticket.status?.toUpperCase()] || "bg-slate-300"}`} />
                           {/* Replaces underscores with spaces (e.g. IN_PROGRESS -> IN PROGRESS) */}
-                          {ticket.status?.replace('_', ' ')}
+                          {ticket.status?.toUpperCase().replace('_', ' ')}
                         </span>
                       </td>
                       <td className="px-3 py-3 text-slate-500">{formatDateTime(ticket.createdAt)}</td>
