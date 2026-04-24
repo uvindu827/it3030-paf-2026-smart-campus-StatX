@@ -5,6 +5,9 @@ package com.paf_project.smartcampus.repository;
 
 import com.paf_project.smartcampus.model.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -23,4 +26,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             LocalDate bookingDate,
             LocalTime endTime,
             LocalTime startTime);
+
+    @Modifying
+    @Query("DELETE FROM Booking b WHERE b.user.userId = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 }

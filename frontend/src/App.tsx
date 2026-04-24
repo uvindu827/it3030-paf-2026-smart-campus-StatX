@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 
@@ -47,7 +48,7 @@ function AppContent() {
 
   return (
     <>
-      {/* 1. Show Navbar only for logged-in users and non-auth pages */}
+      {/* Show Navbar only for logged-in users and non-auth pages */}
       {!isAuthPage && <Navbar />}
 
       <div className="w-full min-h-screen">
@@ -120,7 +121,7 @@ function AppContent() {
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="bookings" element={<AdminBookingManagement />} />
-            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="users" element={<UserManagement />} />
           </Route>
 
           {/* CATCH-ALL REDIRECT */}
@@ -137,6 +138,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      {/* AppContent contains the Navbar and all Routes logic */}
+      <AppContent />
+
       <ToastContainer 
         position="top-right" 
         autoClose={3000} 
