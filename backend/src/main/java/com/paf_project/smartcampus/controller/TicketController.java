@@ -52,6 +52,12 @@ public class TicketController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    // NEW ADDITION: Get all tickets
+    @GetMapping
+    public ResponseEntity<List<TicketResponseDTO>> getAllTickets() {
+        return ResponseEntity.ok(ticketService.getAllTickets());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponseDTO> getTicketById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.getTicketById(id));
