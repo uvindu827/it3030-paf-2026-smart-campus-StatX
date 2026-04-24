@@ -102,7 +102,7 @@ public class BookingService {
         Booking updatedBooking = bookingRepository.save(booking);
 
         //notify user about booking rejection
-        notificationHelper.notifyBookingApproved(
+        notificationHelper.notifyBookingRejected(
             booking.getUser().getUserId(), // Clean and safe
             booking.getId(),
             booking.getResourceName(),
@@ -121,9 +121,9 @@ public class BookingService {
 
          //notify user about booking cancellation
         notificationHelper.notifyBookingcancelled(
-            Long.parseLong(booking.getRequestedBy()), 
-            booking.getId(), 
-            booking.getResourceName() 
+            booking.getUser().getUserId(), // Clean and safe
+            booking.getId(),
+            booking.getResourceName()
         );
 
         return mapToResponseDTO(updatedBooking);
