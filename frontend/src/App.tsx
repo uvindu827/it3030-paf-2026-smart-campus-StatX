@@ -4,7 +4,6 @@ import { ToastContainer } from 'react-toastify';
 // Components & Layouts
 import Navbar from "./components/Navbar";
 import AdminLayout from './layouts/AdminLayout';
-import TicketDashboard from './components/TicketDashboard';
 
 // User Pages
 import HomePage from "./pages/HomePage";
@@ -16,6 +15,10 @@ import TicketListPage from "./pages/TicketListPage";
 import NotificationsPage from "./pages/NotificationPage";
 import NotificationSettingsPage from "./pages/NotificationSettings";
 import UserManagement from "./pages/admin/UserManagement";
+
+// ✨ NEW SEPARATED TICKET PAGES ✨
+import CreateTicket from "./components/CreateTicket";
+import AdminTicketDetails from "./components/AdminTicketDetails";
 
 // Resource Pages
 import ResourcesPage from "./features/resources/ResourcesPage";
@@ -81,10 +84,17 @@ function AppContent() {
             path="/tickets" 
             element={isAuthenticated ? <TicketListPage /> : <Navigate to="/login" />} 
           />
+          
+          {/* ✨ OUR NEW ROUTES ✨ */}
           <Route 
-            path="/ticket-dashboard/:id?" 
-            element={isAuthenticated ? <TicketDashboard /> : <Navigate to="/login" />} 
+            path="/create-ticket" 
+            element={isAuthenticated ? <CreateTicket /> : <Navigate to="/login" />} 
           />
+          <Route 
+            path="/ticket/:id" 
+            element={isAuthenticated ? <AdminTicketDetails /> : <Navigate to="/login" />} 
+          />
+
           <Route 
             path="/resources" 
             element={isAuthenticated ? <ResourcesPage /> : <Navigate to="/login" />} 
