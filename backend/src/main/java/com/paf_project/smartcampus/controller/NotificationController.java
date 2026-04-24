@@ -2,15 +2,16 @@ package com.paf_project.smartcampus.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.paf_project.smartcampus.dto.CreateNotificationRequest;
 import com.paf_project.smartcampus.dto.NotificationDTO;
@@ -21,14 +22,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
-
+// HATEOAS Imports
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/v1/notifications")
@@ -44,83 +43,90 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    public ResponseEntity<Page<NotificationDTO>> getMyNotifications(
+    public ResponseEntity<PagedModel<EntityModel<NotificationDTO>>> getMyNotifications(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        PagedResourcesAssembler<NotificationDTO> assembler
     ) {
         log.info("Get-fetching notifications page {} with zise {}", page, size);
-
         Pageable pageable = PageRequest.of(page, size);
-
         Page<NotificationDTO> notifications = notificationService.getMyNotifications(pageable);
 
+        PagedModel<EntityModel<NotificationDTO>> pagedModel = assembler.toModel(notifications, 
+            dto -> EntityModel.of(dto,
+                linkTo(methodOn(NotificationController.class).markAsRead(dto.getId())).withRel("mark_read"),
+                linkTo(methodOn(NotificationController.class).deleteNotification(dto.getId())).withRel("delete")
+            )
+        );
+        
         log.info("Found {} notifications for current user", notifications.getTotalElements());
 
-        return ResponseEntity.ok(notifications);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))
+                .body(pagedModel);
     }
 
     @GetMapping("/by-type")
-        public ResponseEntity<Page<NotificationDTO>> getNotificationsByType(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam NotificationType type
-        ) {
-            log.info("GET-fetching notifications by type {}", type);
+    public ResponseEntity<Page<NotificationDTO>> getNotificationsByType(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam NotificationType type
+    ) {
+        log.info("GET-fetching notifications by type {}", type);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<NotificationDTO> notifications = notificationService.getNotificationsByType(type, pageable);
 
-            Pageable pageable = PageRequest.of(page, size);
+        log.info("Found {} notifications of type {}", notifications.getTotalElements(), type);
 
-            Page<NotificationDTO> notifications = notificationService.getNotificationsByType(
-                type, 
-                pageable
-            );
-
-            log.info("Found {} notifications of type {}", notifications.getTotalElements(), type);
-
-            return ResponseEntity.ok(notifications);
-        }
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.MINUTES))
+                .body(notifications);
+    }
     
     @PostMapping
-    public ResponseEntity<NotificationDTO> createNotification(
+    public ResponseEntity<EntityModel<NotificationDTO>> createNotification(
         @RequestBody CreateNotificationRequest request
     ) {
-        
         log.info("POST-creating notifications {}", request);
-
         NotificationDTO createdNotification = notificationService.createNotification(request);
 
         if(createdNotification == null) {
             log.warn("Notification is not created - user has disabled notifications type");
-
-            return ResponseEntity.ok(null);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build(); // Constraint: Uniform Interface
         }
 
         log.info("Notification created with id {}", createdNotification.getId());
         
-        return ResponseEntity.status(201).body(createdNotification);
+        // HATEOAS: Adding self-descriptive links to the response
+        EntityModel<NotificationDTO> resource = EntityModel.of(createdNotification);
+        resource.add(linkTo(methodOn(NotificationController.class).createNotification(request)).withSelfRel());
+        resource.add(linkTo(methodOn(NotificationController.class).deleteNotification(createdNotification.getId())).withRel("delete"));
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(resource);
     }
 
     @GetMapping("/unread")
-    public ResponseEntity<List<NotificationDTO>> getUnreadNotifications(){
-
+    public ResponseEntity<CollectionModel<NotificationDTO>> getUnreadNotifications(){
         log.info("GET_fetching unread notifications");
-
         List<NotificationDTO> unreadNotifications = notificationService.getMyUnreadNotifications();
-
         log.info("Found {} unread notifications", unreadNotifications.size());
 
-        return ResponseEntity.ok(unreadNotifications);
+        // HATEOAS: CollectionModel for list of resources
+        CollectionModel<NotificationDTO> collectionModel = CollectionModel.of(unreadNotifications);
+        collectionModel.add(linkTo(methodOn(NotificationController.class).getUnreadNotifications()).withSelfRel());
+
+        return ResponseEntity.ok(collectionModel);
     }
 
-    @GetMapping("/unread-count")
-    public ResponseEntity<Map<String, Long>> getMethodName() {
-        
+    @GetMapping("/counts/unread") // REST Fix: Resource-based naming (Noun instead of Verb)
+    public ResponseEntity<Map<String, Long>> getUnreadCount() {
         log.info("GET_fetching unread notifications count");
-
         Long unreadCount = notificationService.getUnreadCount();
-
         log.info("found {} unread notifications", unreadCount);
 
-        return ResponseEntity.ok(Map.of("count", unreadCount));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noCache()) // Counts should not be cached
+                .body(Map.of("count", unreadCount));
     }
     
     @PutMapping("/{id}/read")
@@ -129,25 +135,19 @@ public class NotificationController {
         @PathVariable Long id
     ){
         log.info("PUT-marking notification as read");
-
         notificationService.markAsRead(id);
-
         log.info("Notification {} marked as read", id);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build(); // Constraint: Uniform Interface (204 No Content)
     }
 
     @PutMapping("/mark-all-read")
-    public ResponseEntity<Void> markAllAsRead() 
-    {
-        
+    public ResponseEntity<Void> markAllAsRead() {
         log.info("PUT-marking all notifications as read");
-
         notificationService.markAllAsRead();
-
         log.info("All notifications marked as read");
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
@@ -156,15 +156,9 @@ public class NotificationController {
         @PathVariable Long id
     ){
         log.info("DELETE-deleting notification {}", id);
-
         notificationService.deleteNotification(id);
-
         log.info("Notification {} deleted successfully", id);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // Constraint: Uniform Interface
     }
-
-    
-    
-    
 }
