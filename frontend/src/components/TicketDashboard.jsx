@@ -22,6 +22,9 @@ export default function TicketDashboard() {
   // ==========================================
   const [ticketDetails, setTicketDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [newComment, setNewComment] = useState("");
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   
   const LOGGED_IN_USER_ID = 12; // Simulating the logged-in user for ownership checks
   const { id } = useParams(); // This grabs the ID directly from the URL!
@@ -172,6 +175,38 @@ useEffect(() => {
       }
     } catch (error) {
       console.error("API Error:", error);
+    }
+  };
+
+  // 5. POST API - Add Comment
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return; // Don't submit empty comments!
+    setIsSubmittingComment(true);
+
+    try {
+      const payload = {
+        authorUserId: LOGGED_IN_USER_ID,
+        commentText: newComment
+      };
+
+      const response = await fetch(`http://localhost:8080/api/tickets/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        // Our backend returns the fully updated ticket, so we just overwrite the state!
+        const updatedTicket = await response.json();
+        setTicketDetails(updatedTicket); 
+        setNewComment(""); // Clear the input box
+      } else {
+        alert("Failed to post comment.");
+      }
+    } catch (error) {
+      console.error("API Error adding comment:", error);
+    } finally {
+      setIsSubmittingComment(false);
     }
   };
 
@@ -379,8 +414,20 @@ useEffect(() => {
 
               {/* Add Note Input */}
               <div className="mt-auto relative">
-                 <input type="text" placeholder="Add a secure internal note..." className="w-full bg-slate-100 rounded-xl pl-4 pr-12 py-4 text-sm border-none focus:ring-2 focus:ring-indigo-500" />
-                 <button className="absolute right-4 top-4 text-indigo-600 hover:text-indigo-800">
+                 <input 
+                   type="text" 
+                   value={newComment}
+                   onChange={(e) => setNewComment(e.target.value)}
+                   onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                   placeholder="Add a secure internal note..." 
+                   disabled={isSubmittingComment}
+                   className="w-full bg-slate-100 rounded-xl pl-4 pr-12 py-4 text-sm border-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50" 
+                 />
+                 <button 
+                   onClick={handleAddComment}
+                   disabled={isSubmittingComment || !newComment.trim()}
+                   className="absolute right-4 top-4 text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
+                 >
                    <Send className="w-5 h-5" />
                  </button>
               </div>

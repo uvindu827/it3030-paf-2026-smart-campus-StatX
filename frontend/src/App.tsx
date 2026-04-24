@@ -82,7 +82,7 @@ function AppContent() {
             element={isAuthenticated ? <TicketListPage /> : <Navigate to="/login" />} 
           />
           <Route 
-            path="/ticket-dashboard" 
+            path="/ticket-dashboard/:id?" 
             element={isAuthenticated ? <TicketDashboard /> : <Navigate to="/login" />} 
           />
           <Route 
@@ -127,24 +127,6 @@ function AppContent() {
 function App() {
   return (
     <Router>
-<<<<<<< HEAD
-      <Navbar />
-      <div className="container">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/bookings" element={<BookingListPage />} />
-          <Route path="/add-booking" element={<AddBookingPage />} />
-          <Route path="/edit-booking/:id" element={<EditBookingPage />} />
-          <Route path="/booking/:id" element={<BookingDetailsPage />} />
-          <Route path="/tickets" element={<TicketListPage />} />
-          <Route path="/ticket-dashboard/:id?" element={<TicketDashboard />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/login-success" element={<LoginSuccess/>} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/browse" element={<UserResourcesPage />} />
-        </Routes>
-      </div>
-=======
       <ToastContainer 
         position="top-right" 
         autoClose={3000} 
@@ -154,7 +136,6 @@ function App() {
         theme="light"
       />
       <AppContent />
->>>>>>> 9148dc2bd2ae203e13c82a7db0fc4960899059fa
     </Router>
   );
 }
