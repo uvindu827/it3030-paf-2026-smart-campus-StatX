@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 
@@ -44,7 +45,7 @@ function AppContent() {
 
   return (
     <>
-      {/* 1. Show Navbar only for logged-in users and non-auth pages */}
+      {/* Show Navbar only for logged-in users and non-auth pages */}
       {!isAuthPage && <Navbar />}
 
       <div className="w-full min-h-screen">
@@ -110,7 +111,7 @@ function AppContent() {
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="bookings" element={<AdminBookingManagement />} />
-            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="users" element={<UserManagement />} />
           </Route>
 
           {/* CATCH-ALL REDIRECT */}
@@ -127,24 +128,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-<<<<<<< HEAD
-      <Navbar />
-      <div className="container">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/bookings" element={<BookingListPage />} />
-          <Route path="/add-booking" element={<AddBookingPage />} />
-          <Route path="/edit-booking/:id" element={<EditBookingPage />} />
-          <Route path="/booking/:id" element={<BookingDetailsPage />} />
-          <Route path="/tickets" element={<TicketListPage />} />
-          <Route path="/ticket-dashboard/:id?" element={<TicketDashboard />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/login-success" element={<LoginSuccess/>} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/browse" element={<UserResourcesPage />} />
-        </Routes>
-      </div>
-=======
+      {/* AppContent contains the Navbar and all Routes logic */}
+      <AppContent />
+
       <ToastContainer 
         position="top-right" 
         autoClose={3000} 
@@ -153,8 +139,6 @@ function App() {
         pauseOnHover
         theme="light"
       />
-      <AppContent />
->>>>>>> 9148dc2bd2ae203e13c82a7db0fc4960899059fa
     </Router>
   );
 }
