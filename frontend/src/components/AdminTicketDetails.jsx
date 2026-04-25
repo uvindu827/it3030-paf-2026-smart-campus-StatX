@@ -8,8 +8,11 @@ export default function AdminTicketDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  // --- LOGGED IN USER LOGIC ---
+  // Get userId from localStorage, parse it, and provide a fallback (1) if not found
+  const LOGGED_IN_USER_ID = parseInt(localStorage.getItem('userId')) || 1; 
   
-  const LOGGED_IN_USER_ID = 12; 
   const { id } = useParams();
 
   const getAuthToken = () => {
@@ -81,6 +84,7 @@ export default function AdminTicketDetails() {
   };
 
   const handleDeleteComment = async (commentId, authorId) => {
+    // Now LOGGED_IN_USER_ID is defined and usable here
     if (authorId !== LOGGED_IN_USER_ID) {
       toast.warning("You can only delete your own comments!");
       return;
@@ -110,7 +114,12 @@ export default function AdminTicketDetails() {
     setIsSubmittingComment(true);
 
     try {
-      const payload = { authorUserId: LOGGED_IN_USER_ID, commentText: newComment };
+      // Using the variable from localStorage
+      const payload = { 
+        authorUserId: LOGGED_IN_USER_ID, 
+        commentText: newComment 
+      };
+      
       const token = getAuthToken();
 
       const response = await fetch(`http://localhost:8080/api/tickets/${id}/comments`, {
@@ -141,12 +150,6 @@ export default function AdminTicketDetails() {
     return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
-  const getDisplayUrl = (path) => {
-    if (!path) return "";
-    const fileName = path.split(/[\\/]/).pop();
-    return `http://localhost:8080/uploads/tickets/${fileName}`;
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 p-8 flex justify-center">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 flex flex-col min-h-[700px]">
@@ -159,7 +162,7 @@ export default function AdminTicketDetails() {
           <div className="flex items-center justify-center h-full text-slate-500 font-bold">No ticket found.</div>
         ) : (
           <>
-            {/* ✨ UPGRADED DASHBOARD HEADER (LIGHT THEME) ✨ */}
+            {/* --- Header Section --- */}
             <div className="bg-white rounded-2xl p-6 mb-8 text-slate-800 relative overflow-hidden shadow-sm border-2 border-indigo-100">
               <div className="relative z-10 flex justify-between items-start">
                 <div className="max-w-xl">
@@ -182,46 +185,14 @@ export default function AdminTicketDetails() {
               </div>
             </div>
 
-            {ticketDetails.attachments && ticketDetails.attachments.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-[11px] font-black text-slate-400 mb-3 tracking-widest flex items-center gap-2 uppercase">
-                  <Paperclip className="w-4 h-4" /> Evidence Attached
-                </h3>
-                <div className="flex flex-wrap gap-4">
-                  {ticketDetails.attachments.map((attachment, index) => {
-                    const rawPath = attachment.filePath || attachment.path || (typeof attachment === 'string' ? attachment : null);
-                    if (!rawPath) return null; 
-                    const fileName = rawPath.split(/[\\/]/).pop();
-                    const fullImageUrl = `http://localhost:8080/uploads/tickets/${fileName}`;
-
-                    return (
-                      <a key={attachment.id || index} href={fullImageUrl} target="_blank" rel="noopener noreferrer" className="block group">
-                        <div className="relative overflow-hidden rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md hover:border-indigo-300">
-                          <img 
-                            src={fullImageUrl} 
-                            alt={`Attachment ${index + 1}`} 
-                            className="h-32 w-48 object-cover transition-transform group-hover:scale-105"
-                            onError={(e) => { e.target.src = "https://placehold.co/200x150?text=Image+Not+Found"; }} 
-                          />
-                        </div>
-                      </a>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
+            {/* --- Status Selection --- */}
             <div className="flex justify-between items-center border-y border-slate-100 py-5 mb-8">
               <div className="flex items-center gap-4">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Current Status:</span>
                 <select 
                   value={ticketDetails.status?.toUpperCase() || 'OPEN'} 
                   onChange={handleStatusChange} 
-                  className={`border rounded-xl px-4 py-2 text-sm font-bold outline-none cursor-pointer transition-all shadow-sm
-                    ${ticketDetails.status === 'OPEN' ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' : 
-                      ticketDetails.status === 'IN_PROGRESS' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' : 
-                      ticketDetails.status === 'RESOLVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 
-                      'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'}`}
+                  className="border rounded-xl px-4 py-2 text-sm font-bold outline-none cursor-pointer transition-all shadow-sm bg-slate-50"
                 >
                   <option value="OPEN">🔵 Open</option>
                   <option value="IN_PROGRESS">🟠 In Progress</option>
@@ -231,6 +202,7 @@ export default function AdminTicketDetails() {
               </div>
             </div>
 
+            {/* --- Timeline / Comments --- */}
             <h3 className="text-[11px] font-black text-slate-400 mb-6 tracking-widest flex items-center gap-2 uppercase">
               Activity Timeline
             </h3>
@@ -245,24 +217,22 @@ export default function AdminTicketDetails() {
                       U{comment.authorUserId}
                     </div>
                     
-                    <div className="flex-1 bg-white border border-slate-200 shadow-sm rounded-2xl rounded-tl-none p-5 transition-all hover:shadow-md hover:border-slate-300 relative">
-                      <div className="absolute -left-2 top-0 w-4 h-4 bg-white border-l border-b border-slate-200 transform rotate-45 rounded-sm"></div>
-                      
-                      <div className="flex justify-between items-start mb-2 relative z-10">
+                    <div className="flex-1 bg-white border border-slate-200 shadow-sm rounded-2xl rounded-tl-none p-5 relative">
+                      <div className="flex justify-between items-start mb-2">
                         <span className="text-sm font-bold text-slate-800">User {comment.authorUserId}</span>
-                        <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                        <span className="text-xs font-semibold text-slate-400">
                           {formatDate(comment.createdAt)}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-600 relative z-10 leading-relaxed">
+                      <p className="text-sm text-slate-600 leading-relaxed">
                         {comment.commentText}
                       </p>
                       
+                      {/* Using the defined LOGGED_IN_USER_ID here */}
                       {comment.authorUserId === LOGGED_IN_USER_ID && (
                         <button 
                           onClick={() => handleDeleteComment(comment.id, comment.authorUserId)} 
-                          className="absolute right-4 bottom-4 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 bg-slate-50 p-2 rounded-lg"
-                          title="Delete note"
+                          className="absolute right-4 bottom-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -273,21 +243,21 @@ export default function AdminTicketDetails() {
               </div>
             </div>
 
-            {/* ✨ UPGRADED COMMENT INPUT ✨ */}
+            {/* --- Input Section --- */}
             <div className="relative mt-2">
                <input 
                  type="text" 
                  value={newComment}
                  onChange={(e) => setNewComment(e.target.value)}
                  onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
-                 placeholder="Type a resolution note or update..." 
-                 className="w-full bg-white border-2 border-slate-100 rounded-2xl pl-5 pr-16 py-4 text-sm font-medium transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none shadow-sm placeholder:text-slate-400" 
+                 placeholder="Type a resolution note..." 
+                 className="w-full bg-white border-2 border-slate-100 rounded-2xl pl-5 pr-16 py-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none" 
                  disabled={isSubmittingComment}
                />
                <button 
                  onClick={handleAddComment} 
                  disabled={isSubmittingComment || !newComment.trim()}
-                 className="absolute right-2 top-2 bottom-2 aspect-square bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white rounded-xl flex items-center justify-center transition-all shadow-md"
+                 className="absolute right-2 top-2 bottom-2 aspect-square bg-indigo-600 text-white rounded-xl flex items-center justify-center disabled:bg-slate-300"
                >
                  {isSubmittingComment ? (
                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

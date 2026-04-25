@@ -11,9 +11,11 @@ import com.paf_project.smartcampus.exception.ResourceNotFoundException;
 import com.paf_project.smartcampus.model.Ticket;
 import com.paf_project.smartcampus.model.TicketAttachment;
 import com.paf_project.smartcampus.model.TicketStatus;
+import com.paf_project.smartcampus.model.User;
 import com.paf_project.smartcampus.model.TicketComment;
 import com.paf_project.smartcampus.repository.TicketAttachmentRepository;
 import com.paf_project.smartcampus.repository.TicketRepository;
+import com.paf_project.smartcampus.repository.UserRepository;
 import com.paf_project.smartcampus.repository.TicketCommentRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final TicketAttachmentRepository ticketAttachmentRepository;
     private final TicketCommentRepository ticketCommentRepository;
+    private final UserRepository userRepository;
     private final Path uploadRoot;
     private final NotificationHelper notificationHelper;
 
@@ -49,11 +52,13 @@ public class TicketService {
             TicketRepository ticketRepository,
             TicketAttachmentRepository ticketAttachmentRepository,
             TicketCommentRepository ticketCommentRepository,
+            UserRepository userRepository,
             NotificationHelper notificationHelper, // Added here
             @Value("${app.ticket-uploads.dir:uploads/tickets}") String uploadDirectory) {
         this.ticketRepository = ticketRepository;
         this.ticketAttachmentRepository = ticketAttachmentRepository;
         this.ticketCommentRepository = ticketCommentRepository;
+        this.userRepository = userRepository;
         this.notificationHelper = notificationHelper; // Assigned here
         this.uploadRoot = Paths.get(uploadDirectory).toAbsolutePath().normalize();
     }
@@ -155,6 +160,9 @@ public class TicketService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id: " + ticketId));
 
+        User commenter = userRepository.findById(request.getAuthorUserId())
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getAuthorUserId()));
+
         TicketComment comment = TicketComment.builder()
                 .ticket(ticket)
                 .authorUserId(request.getAuthorUserId())
@@ -166,10 +174,23 @@ public class TicketService {
         // Save the comment using the repository
         ticketCommentRepository.save(comment);
 
+        Long ticketOwnerId = ticket.getReportedByUserId(); // Usually this is the owner/creator
+        Long commenterUserId = request.getAuthorUserId();
+        String commenterName = commenter.getName(); 
+
+        if (!ticketOwnerId.equals(commenterUserId)) {
+            notificationHelper.notifyCommentAdded(
+                ticketOwnerId,  // Target: The person who opened the ticket
+                ticketId,       // Context: Which ticket
+                commenterName   // Payload: "X added a comment"
+            );
+        }
+
         // Fetch the updated ticket to return the fresh data
         Ticket hydratedTicket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found after adding comment."));
         initializeCollections(hydratedTicket);
+        
         return mapToResponse(hydratedTicket);
     }
 
