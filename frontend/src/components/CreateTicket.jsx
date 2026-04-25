@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { UploadCloud, ShieldAlert, ArrowLeft } from 'lucide-react';
+
 import { toast } from 'react-toastify';
 
 export default function CreateTicket() {
@@ -49,21 +47,23 @@ export default function CreateTicket() {
     });
 
     try {
+      // Reverted to your original safe fetch call!
       const response = await fetch('http://localhost:8080/api/tickets', {
         method: 'POST',
         body: data, 
       });
       
       if (response.ok) {
-        toast.success("Issue reported successfully! 🚀");
-        setTimeout(() => navigate('/resources'), 2000); // Redirect back
+        toast.success("Success! Ticket created perfectly. 🚀");
+        setFormData({ resourceId: '', reporterUserId: '', contactDetails: '', category: 'Electrical', priority: 'High', description: '' });
+        setFiles([]);
       } else {
-        const errData = await response.json();
-        toast.error(`Failed: ${errData.message || response.status}`);
+        toast.error(`Ticket creation failed: ${response.status}`);
       }
     } catch (error) {
       toast.error("Connection error to server");
       console.error("API Error:", error);
+      toast.error("Network error. Is the backend running?");
     } finally {
       setIsSubmitting(false);
     }
@@ -73,105 +73,123 @@ export default function CreateTicket() {
   
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    if (selectedFiles.length > 3) {
-      toast.warn("Maximum 3 images allowed!");
+    if (files.length + selectedFiles.length > 3) {
+      toast.warning("Maximum 3 images allowed! 📸");
       return;
     }
-    setFiles(selectedFiles);
+    setFiles([...files, ...selectedFiles].slice(0, 3)); 
+  };
+
+  const removeFile = (indexToRemove) => {
+    setFiles(files.filter((_, index) => index !== indexToRemove));
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8 flex justify-center items-start pt-12">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
-        
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-slate-500 hover:text-indigo-600 mb-4 transition-colors">
-          <ArrowLeft size={16} /> <span className="text-sm font-medium">Back to Resources</span>
-        </button>
-
-        <div className="flex items-center gap-2 mb-6 text-indigo-900">
-          <ShieldAlert className="text-red-500" />
-          <h2 className="text-xl font-bold">Report an Incident</h2>
+    <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-800 flex justify-center items-start pt-12">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl shadow-slate-200/40 border border-slate-100 p-8 transition-all">
+        <div className="flex items-center gap-3 mb-8 border-b border-slate-100 pb-5">
+          <div className="bg-red-50 p-3 rounded-xl">
+            <ShieldAlert className="text-red-500 w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-slate-800 tracking-tight">Report an Incident</h2>
+            <p className="text-sm text-slate-500 font-medium mt-1">Submit details and evidence for maintenance.</p>
+          </div>
         </div>
 
-        {/* Selected Resource Summary Box */}
-        <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6">
-          <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Target Resource</p>
-          <p className="text-lg font-bold text-indigo-900">{resourceName || "Generic Resource"}</p>
-          <p className="text-xs text-indigo-700">Resource ID: #{resourceId || "N/A"}</p>
-        </div>
+        <form onSubmit={handleFormSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-5">
+            <div>
+              <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">RESOURCE ID</label>
+              <input type="text" name="resourceId" value={formData.resourceId} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none hover:border-slate-300" placeholder="e.g. 1" required />
+            </div>
+            <div>
+              <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">REPORTER ID</label>
+              <input type="text" name="reporterUserId" value={formData.reporterUserId} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none hover:border-slate-300" placeholder="e.g. 12" required />
+            </div>
+          </div>
 
         <form onSubmit={handleFormSubmit} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">CONTACT EMAIL</label>
-            <input 
-              type="text" 
-              name="contactDetails" 
-              value={formData.contactDetails} 
-              onChange={handleInputChange} 
-              className="w-full bg-slate-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 border-none" 
-              placeholder="your-email@campus.edu" 
-              required 
-            />
+            <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">CONTACT DETAILS</label>
+            <input type="email" name="contactDetails" value={formData.contactDetails} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none hover:border-slate-300" placeholder="admin@campus.edu" required />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-5">
             <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1">ISSUE CATEGORY</label>
-              <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-slate-100 rounded-lg px-3 py-2 text-sm border-none">
-                <option>Electrical</option>
-                <option>Network</option>
-                <option>Facilities</option>
-                <option>Furniture</option>
+              <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">CATEGORY</label>
+              <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none cursor-pointer">
+                <option value="Electrical">⚡ Electrical</option>
+                <option value="Network">🌐 Network</option>
+                <option value="Facilities">🏢 Facilities</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1">URGENCY</label>
-              <select name="priority" value={formData.priority} onChange={handleInputChange} className="w-full bg-slate-100 rounded-lg px-3 py-2 text-sm border-none">
-                <option>Low</option>
-                <option>Medium</option>
-                <option>High</option>
-                <option>Critical</option>
+              <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">PRIORITY</label>
+              <select name="priority" value={formData.priority} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none cursor-pointer">
+                <option value="Low">🟢 Low</option>
+                <option value="Medium">🟡 Medium</option>
+                <option value="High">🟠 High</option>
+                <option value="Critical">🔴 Critical</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">DESCRIPTION OF THE ISSUE</label>
-            <textarea 
-              name="description" 
-              value={formData.description} 
-              onChange={handleInputChange} 
-              rows="4" 
-              className="w-full bg-slate-100 rounded-lg px-3 py-2 text-sm border-none focus:ring-2 focus:ring-indigo-500" 
-              placeholder="What's wrong? Please be specific..." 
-              required 
-            />
+            <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">DESCRIPTION</label>
+            <textarea name="description" value={formData.description} onChange={handleInputChange} rows="4" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none hover:border-slate-300 resize-none" placeholder="Detail the exact nature of the failure so maintenance knows what to bring..." required></textarea>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">PHOTO EVIDENCE (MAX 3)</label>
-            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors">
-              <input type="file" multiple accept="image/*" onChange={handleFileChange} className="hidden" id="file-upload" />
-              <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
-                <UploadCloud className="w-8 h-8 text-indigo-400 mb-2" />
-                <span className="text-sm font-medium text-slate-600">Click to <span className="text-indigo-600">Upload Images</span></span>
-              </label>
-              {files.length > 0 && (
-                <div className="mt-2 flex gap-2 justify-center">
-                  {files.map((f, i) => (
-                    <span key={i} className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-1 rounded">File {i+1}</span>
-                  ))}
-                </div>
-              )}
-            </div>
+            <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider flex justify-between">
+              <span>ATTACH EVIDENCE</span>
+              <span className={files.length === 3 ? "text-red-500" : "text-slate-400"}>{files.length}/3 MAX</span>
+            </label>
+            
+            {files.length < 3 && (
+              <div className="border-2 border-dashed border-indigo-200 bg-indigo-50/50 rounded-2xl p-8 text-center hover:bg-indigo-50 transition-colors group">
+                <input type="file" multiple accept="image/*" onChange={handleFileChange} className="hidden" id="file-upload" />
+                <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
+                  <div className="bg-white p-3 rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                    <UploadCloud className="w-6 h-6 text-indigo-500" />
+                  </div>
+                  <span className="text-sm font-semibold text-slate-600">Drop images here or <span className="text-indigo-600 hover:underline">browse files</span></span>
+                  <span className="text-xs font-medium text-slate-400 mt-1">PNG, JPG up to 5MB</span>
+                </label>
+              </div>
+            )}
+
+            {files.length > 0 && (
+              <div className="flex gap-4 mt-4">
+                {files.map((file, index) => (
+                  <div key={index} className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-slate-200 shadow-sm group">
+                    <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" />
+                    <button 
+                      type="button" 
+                      onClick={() => removeFile(index)} 
+                      className="absolute top-1 right-1 bg-white/90 backdrop-blur-sm rounded-full text-slate-700 p-1 shadow-sm hover:bg-red-500 hover:text-white transition-colors"
+                    >
+                      <X className="w-3 h-3 font-bold" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <button 
             type="submit" 
             disabled={isSubmitting} 
-            className="w-full bg-indigo-900 hover:bg-indigo-800 disabled:bg-slate-400 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-[0.98]"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200 flex justify-center items-center gap-2 mt-4"
           >
-            {isSubmitting ? 'Processing...' : 'Submit Incident Report'}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Uploading Ticket...</span>
+              </>
+            ) : (
+              'Submit Incident Report'
+            )}
           </button>
         </form>
       </div>
