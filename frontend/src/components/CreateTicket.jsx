@@ -1,21 +1,21 @@
-
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { ShieldAlert, UploadCloud, X, Loader2 } from "lucide-react"; // Added missing imports
 import { toast } from 'react-toastify';
 
 export default function CreateTicket() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
-  // 1. Get Resource Info from URL
-  const resourceId = searchParams.get('resId');
-  const resourceName = searchParams.get('resName');
-
-  // 2. Get User Info from LocalStorage (Handling your specific keys)
+  // 1. Get Info from URL and LocalStorage
+  const resourceIdFromUrl = searchParams.get('resId') || '';
+  const resourceName = searchParams.get('resName') || '';
   const userEmail = localStorage.getItem('userEmail') || '';
-  // Note: Since your token/storage doesn't have numeric ID, we use 12 as fallback
-  // In a real app, your login should save 'userId' to localStorage.
-  const userId = localStorage.getItem('userId') || 12; 
+  const userId = localStorage.getItem('userId') || '12'; 
 
   const [formData, setFormData] = useState({
+    resourceId: resourceIdFromUrl, // Initialize with URL param
+    reporterUserId: userId,        // Initialize with LocalStorage ID
     contactDetails: userEmail,
     category: 'Electrical',
     priority: 'Medium',
@@ -27,7 +27,7 @@ export default function CreateTicket() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!resourceId) {
+    if (!formData.resourceId) {
       toast.error("No resource selected!");
       return;
     }
@@ -35,8 +35,8 @@ export default function CreateTicket() {
     setIsSubmitting(true);
     const data = new FormData();
 
-    data.append('resourceId', resourceId); 
-    data.append('reportedByUserId', userId);
+    data.append('resourceId', formData.resourceId); 
+    data.append('reportedByUserId', formData.reporterUserId);
     data.append('preferredContactDetails', formData.contactDetails);
     data.append('category', formData.category);
     data.append('priority', formData.priority.toUpperCase());
@@ -47,7 +47,6 @@ export default function CreateTicket() {
     });
 
     try {
-      // Reverted to your original safe fetch call!
       const response = await fetch('http://localhost:8080/api/tickets', {
         method: 'POST',
         body: data, 
@@ -55,13 +54,11 @@ export default function CreateTicket() {
       
       if (response.ok) {
         toast.success("Success! Ticket created perfectly. 🚀");
-        setFormData({ resourceId: '', reporterUserId: '', contactDetails: '', category: 'Electrical', priority: 'High', description: '' });
-        setFiles([]);
+        navigate('/tickets'); // Redirect after success
       } else {
         toast.error(`Ticket creation failed: ${response.status}`);
       }
     } catch (error) {
-      toast.error("Connection error to server");
       console.error("API Error:", error);
       toast.error("Network error. Is the backend running?");
     } finally {
@@ -86,39 +83,43 @@ export default function CreateTicket() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-800 flex justify-center items-start pt-12">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl shadow-slate-200/40 border border-slate-100 p-8 transition-all">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl shadow-slate-200/40 border border-slate-100 p-8">
+        
         <div className="flex items-center gap-3 mb-8 border-b border-slate-100 pb-5">
           <div className="bg-red-50 p-3 rounded-xl">
             <ShieldAlert className="text-red-500 w-6 h-6" />
           </div>
           <div>
             <h2 className="text-2xl font-black text-slate-800 tracking-tight">Report an Incident</h2>
-            <p className="text-sm text-slate-500 font-medium mt-1">Submit details and evidence for maintenance.</p>
+            <p className="text-sm text-slate-500 font-medium mt-1">
+              Reporting for: <span className="text-indigo-600">{resourceName || "General Maintenance"}</span>
+            </p>
           </div>
         </div>
 
+        {/* ONLY ONE FORM TAG HERE */}
         <form onSubmit={handleFormSubmit} className="space-y-6">
+          
           <div className="grid grid-cols-2 gap-5">
             <div>
               <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">RESOURCE ID</label>
-              <input type="text" name="resourceId" value={formData.resourceId} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none hover:border-slate-300" placeholder="e.g. 1" required />
+              <input type="text" name="resourceId" value={formData.resourceId} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none" required />
             </div>
             <div>
               <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">REPORTER ID</label>
-              <input type="text" name="reporterUserId" value={formData.reporterUserId} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none hover:border-slate-300" placeholder="e.g. 12" required />
+              <input type="text" name="reporterUserId" value={formData.reporterUserId} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none" required />
             </div>
           </div>
 
-        <form onSubmit={handleFormSubmit} className="space-y-5">
           <div>
             <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">CONTACT DETAILS</label>
-            <input type="email" name="contactDetails" value={formData.contactDetails} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none hover:border-slate-300" placeholder="admin@campus.edu" required />
+            <input type="email" name="contactDetails" value={formData.contactDetails} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="admin@campus.edu" required />
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div>
               <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">CATEGORY</label>
-              <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none cursor-pointer">
+              <select name="category" value={formData.category} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 cursor-pointer">
                 <option value="Electrical">⚡ Electrical</option>
                 <option value="Network">🌐 Network</option>
                 <option value="Facilities">🏢 Facilities</option>
@@ -126,18 +127,18 @@ export default function CreateTicket() {
             </div>
             <div>
               <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">PRIORITY</label>
-              <select name="priority" value={formData.priority} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none cursor-pointer">
-                <option value="Low">🟢 Low</option>
-                <option value="Medium">🟡 Medium</option>
-                <option value="High">🟠 High</option>
-                <option value="Critical">🔴 Critical</option>
+              <select name="priority" value={formData.priority} onChange={handleInputChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 cursor-pointer">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Critical">Critical</option>
               </select>
             </div>
           </div>
 
           <div>
             <label className="block text-[11px] font-black text-slate-400 mb-2 tracking-wider">DESCRIPTION</label>
-            <textarea name="description" value={formData.description} onChange={handleInputChange} rows="4" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none hover:border-slate-300 resize-none" placeholder="Detail the exact nature of the failure so maintenance knows what to bring..." required></textarea>
+            <textarea name="description" value={formData.description} onChange={handleInputChange} rows="4" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Detail the issue..." required></textarea>
           </div>
 
           <div>
@@ -147,49 +148,33 @@ export default function CreateTicket() {
             </label>
             
             {files.length < 3 && (
-              <div className="border-2 border-dashed border-indigo-200 bg-indigo-50/50 rounded-2xl p-8 text-center hover:bg-indigo-50 transition-colors group">
-                <input type="file" multiple accept="image/*" onChange={handleFileChange} className="hidden" id="file-upload" />
-                <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
-                  <div className="bg-white p-3 rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform">
-                    <UploadCloud className="w-6 h-6 text-indigo-500" />
-                  </div>
-                  <span className="text-sm font-semibold text-slate-600">Drop images here or <span className="text-indigo-600 hover:underline">browse files</span></span>
-                  <span className="text-xs font-medium text-slate-400 mt-1">PNG, JPG up to 5MB</span>
-                </label>
+              <div className="border-2 border-dashed border-indigo-200 bg-indigo-50/50 rounded-2xl p-8 text-center hover:bg-indigo-50 transition-colors cursor-pointer relative">
+                <input type="file" multiple accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                <div className="flex flex-col items-center">
+                  <UploadCloud className="w-8 h-8 text-indigo-500 mb-2" />
+                  <span className="text-sm font-semibold text-slate-600">Click to upload images</span>
+                </div>
               </div>
             )}
 
-            {files.length > 0 && (
-              <div className="flex gap-4 mt-4">
-                {files.map((file, index) => (
-                  <div key={index} className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-slate-200 shadow-sm group">
-                    <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover group-hover:opacity-75 transition-opacity" />
-                    <button 
-                      type="button" 
-                      onClick={() => removeFile(index)} 
-                      className="absolute top-1 right-1 bg-white/90 backdrop-blur-sm rounded-full text-slate-700 p-1 shadow-sm hover:bg-red-500 hover:text-white transition-colors"
-                    >
-                      <X className="w-3 h-3 font-bold" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="flex gap-4 mt-4">
+              {files.map((file, index) => (
+                <div key={index} className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-slate-200 shadow-sm">
+                  <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => removeFile(index)} className="absolute top-1 right-1 bg-white rounded-full p-1 shadow hover:bg-red-500 hover:text-white">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           <button 
             type="submit" 
             disabled={isSubmitting} 
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-200 flex justify-center items-center gap-2 mt-4"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold py-4 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Uploading Ticket...</span>
-              </>
-            ) : (
-              'Submit Incident Report'
-            )}
+            {isSubmitting ? <><Loader2 className="animate-spin" /> Submitting...</> : 'Submit Incident Report'}
           </button>
         </form>
       </div>
