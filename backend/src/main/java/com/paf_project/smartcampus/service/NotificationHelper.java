@@ -69,6 +69,25 @@ public class NotificationHelper {
         
     }
 
+    public void notifyCommentAdded(Long ticketCreatorUserId, Long ticketId, String commenterName) {
+        log.info("Creating COMMENT_ADDED notification for user {} (ticket {})", ticketCreatorUserId, ticketId);
+        
+        String message = String.format(
+            "%s commented on your ticket #%d",
+            commenterName,
+            ticketId
+        );
+        
+        createNotification(
+            ticketCreatorUserId,
+            NotificationType.COMMENT_ADDED,
+            message,
+            ticketId,
+            "TICKET",
+            NotificationPriority.LOW
+        );
+    }
+
     //booking notifications
     public void notifyBookingApproved(
         Long userId, 

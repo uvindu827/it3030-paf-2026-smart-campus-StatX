@@ -15,6 +15,9 @@ const LoginSuccess = () => {
         if (token) {
             localStorage.setItem('token', token);
             localStorage.setItem('role', role || 'ROLE_USER');
+            if (userId) {
+                localStorage.setItem('userId', userId);
+            }
 
             try {
                 

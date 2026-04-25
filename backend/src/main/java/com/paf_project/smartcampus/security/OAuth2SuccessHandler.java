@@ -45,7 +45,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         // 3. Redirect to React
         // We include name and email here too so your Sidebar can show them immediately
         String targetUrl = String.format(
-            "http://localhost:3000/login-success?token=%s&role=%s&name=%s&email=%s", 
+            "http://localhost:3000/login-success?token=%s&role=%s&name=%s&email=%s&userId=%d", 
             token, 
             role,
             name,
