@@ -124,7 +124,7 @@ const NotificationsPage: React.FC = () => {
           {/* Top Navigation */}
           <div className="flex items-center justify-between mb-6">
             <Link 
-              to="/" 
+              to="/home" 
               className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors duration-200 font-medium"
             >
               <ArrowLeft size={20} />

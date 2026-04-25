@@ -54,7 +54,7 @@ export default function CreateTicket() {
       
       if (response.ok) {
         toast.success("Success! Ticket created perfectly. 🚀");
-        navigate('/tickets'); // Redirect after success
+        navigate('/home'); // Redirect after success
       } else {
         toast.error(`Ticket creation failed: ${response.status}`);
       }
