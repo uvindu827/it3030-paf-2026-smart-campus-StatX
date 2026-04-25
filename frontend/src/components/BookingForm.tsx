@@ -1,6 +1,7 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { Booking } from "../types/booking";
 import { useNavigate } from "react-router-dom";
+import { bookingSchema } from "../types/bookingSchema";
 // @ts-ignore
 import "../App.css";
 import {
@@ -66,6 +67,13 @@ function BookingForm({
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage("");
+
+    // ✅ Zod validation
+    const result = bookingSchema.safeParse(formData);
+    if (!result.success) {
+      setErrorMessage(result.error.issues[0].message);
+      return;
+    }
 
     if (formData.startTime >= formData.endTime) {
       setErrorMessage("End time must be later than start time.");
